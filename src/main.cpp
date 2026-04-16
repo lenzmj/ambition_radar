@@ -56,10 +56,11 @@ void capture_task(HikDriver* cam) {
         if (success && !tmp_frame.empty()) {
             last_success_time = std::chrono::steady_clock::now();
             
-            frame_mtx.lock();
-            tmp_frame.copyTo(shared_frame); 
-            has_new_frame = true;
-            frame_mtx.unlock();
+            {
+                std::lock_guard<std::mutex> lock(frame_mtx);
+                tmp_frame.copyTo(shared_frame); 
+                has_new_frame = true;
+            }
         } else {
             // 检测是否卡死（超过 1 秒没收到图）
             auto now = std::chrono::steady_clock::now();
@@ -94,9 +95,10 @@ void serial_task(SerialDriver* serial) {
     }
 }
 
-int main() {
-    // 1. 先初始化管家，指定你的 config.yaml 绝对路径
-    ConfigManager::getInstance().init("/home/lenzmj/ws/radar/ambution_radar_aim/config/config.yaml");
+int main(int argc, char* argv[]) {
+    // 1. 初始化配置管家（支持命令行传入路径，默认用相对路径）
+    std::string config_path = (argc > 1) ? argv[1] : "config/config.yaml";
+    ConfigManager::getInstance().init(config_path);
     auto& cfg = ConfigManager::getInstance();
 
     // 2. 初始化相机
@@ -145,10 +147,11 @@ int main() {
        // std::cout << "yaw:" << real_yaw <<"  pitch:" << real_pitch <<  std::endl;
         if (has_new_frame)
         {
-            frame_mtx.lock();
-            shared_frame.copyTo(local_frame);
-            has_new_frame = false;
-            frame_mtx.unlock();
+            {
+                std::lock_guard<std::mutex> lock(frame_mtx);
+                shared_frame.copyTo(local_frame);
+                has_new_frame = false;
+            }
 
             vector<DetectResult> results = pikachu_ai.run_yolo(local_frame);
 
@@ -156,7 +159,7 @@ int main() {
             {
                 // 1. 解算
 
-                GimbalCmd cmd = math_solver.solve(results[0], real_yaw, real_pitch, 0.0f);
+                GimbalCmd cmd = math_solver.solve(obj, real_yaw, real_pitch, 0.0f);
 
                 // 2. 绘图：改用旋转矩形的 4 个角点绘制
                 Scalar draw_color = cmd.is_locked ? Scalar(0, 255, 0) : Scalar(255, 255, 255);
@@ -208,6 +211,8 @@ int main() {
     }
 
     // 等待子线程结束并释放资源
+    if (t_serial.joinable())
+        t_serial.join();
     if (t_capture.joinable())
         t_capture.join();
     camera.close_camera();

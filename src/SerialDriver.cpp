@@ -4,8 +4,17 @@
 
 SerialDriver::SerialDriver(const char* port) {
     fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
+    if (fd == -1) {
+        std::cerr << "[SerialDriver] Failed to open serial port: " << port << std::endl;
+        return;
+    }
     struct termios options;
-    tcgetattr(fd, &options);
+    if (tcgetattr(fd, &options) != 0) {
+        std::cerr << "[SerialDriver] Failed to get serial port attributes" << std::endl;
+        close(fd);
+        fd = -1;
+        return;
+    }
     cfsetispeed(&options, B115200);
     cfsetospeed(&options, B115200);
     options.c_cflag |= (CLOCAL | CREAD);
@@ -20,6 +29,8 @@ void SerialDriver::send_packet(const SendPacket& pkt) {
 }
 
 bool SerialDriver::receive_packet(ReceivePacket& in_pkt) {
+    if (fd == -1) return false;
+
     uint8_t buffer[sizeof(ReceivePacket)];
     uint8_t byte;
 
@@ -27,9 +38,9 @@ bool SerialDriver::receive_packet(ReceivePacket& in_pkt) {
     while (read(fd, &byte, 1) > 0) {
         if (byte == 0x5A) {
             buffer[0] = 0x5A;
-            // 2. 必须一次性读完剩下的 15 字节，否则视为无效帧
+            // 2. 必须一次性读完剩下的字节，否则视为无效帧
             int total_read = 1;
-            while (total_read < sizeof(ReceivePacket)) {
+            while (total_read < (int)sizeof(ReceivePacket)) {
                 int n = read(fd, buffer + total_read, sizeof(ReceivePacket) - total_read);
                 if (n <= 0) return false; 
                 total_read += n;
