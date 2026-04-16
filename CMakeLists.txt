@@ -39,3 +39,10 @@ target_link_libraries(app
     pthread
     dl
 )
+
+# Tests (mock-based, no real SDK or hardware needed)
+option(BUILD_TESTS "Build regression tests" ON)
+if(BUILD_TESTS)
+    enable_testing()
+    add_subdirectory(tests)
+endif()
