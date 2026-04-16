@@ -18,8 +18,12 @@ public:
     void flush_input();
     bool isOpen() const;
 
+    // CRC8 校验 (多项式 0x07, 查表法)
+    static uint8_t crc8(const uint8_t* data, size_t len);
+
 private:
     int fd = -1;
+    static const uint8_t crc8_table[256];
 };
 
 #endif // SERIAL_DRIVER_H

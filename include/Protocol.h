@@ -9,7 +9,8 @@ struct SendPacket {
     float pitch = 0.0f;
     float yaw = 0.0f;
     float distance = 0.0f;
-    uint8_t reserved[2] = {0, 0}; // 补齐 16 字节
+    uint8_t reserved = 0; // 补齐 16 字节
+    uint8_t crc = 0;      // CRC8 校验
 };
 
 struct ReceivePacket {
@@ -17,7 +18,8 @@ struct ReceivePacket {
     float current_yaw = 0.0f;
     float current_pitch = 0.0f;
     float current_roll = 0.0f; 
-    uint8_t reserved[3] = {0, 0, 0}; // 补齐 16 字节
+    uint8_t reserved[2] = {0, 0}; // 补齐 16 字节
+    uint8_t crc = 0;              // CRC8 校验
 };
 #pragma pack(pop)
 #endif
