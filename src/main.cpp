@@ -110,6 +110,10 @@ int main() {
     string port = cfg.get<string>("hardware.serial_port", "");
     SerialDriver serial(port.c_str());
     cout << "[检查] 内存中读取到的串口路径: " << port.c_str()<< endl;
+    if (!serial.isOpen()) {
+        cerr << "[Error] Serial port open failed, exiting." << endl;
+        return -1;
+    }
 
     // 4. 初始化 AI 模型 (路径也可以从 YAML 读)
     string model_path = cfg.get<string>("hardware.model_path", "");
