@@ -1,7 +1,6 @@
 #include "SerialDriver.h"
 #include <iostream>
 
-
 SerialDriver::SerialDriver(const char* port) {
     fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
     struct termios options;
