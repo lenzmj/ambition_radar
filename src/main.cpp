@@ -143,7 +143,7 @@ int main() {
         float real_yaw = latest_real_yaw.load();
         float real_pitch = latest_real_pitch.load();
         std::cout  <<"----------------------------------------------------------------" <<  std::endl;
-        std::cout << "yaw:" << real_yaw <<"  pitch:" << real_pitch <<  std::endl;
+        std::cout <<"pitch:" << real_pitch   <<" , yaw:" << real_yaw << std::endl;
         if (has_new_frame)
         {
             frame_mtx.lock();
@@ -191,7 +191,7 @@ int main() {
                 pkt.mode = 1;
                 pkt.pitch = cmd.target_pitch;
                 pkt.yaw = cmd.target_yaw;
-                pkt.distance = cmd.p_world_z;
+                pkt.distance = cmd.p_world_x;
                 serial.send_packet(pkt);
                 cout <<  "pitch:" << pkt.pitch  <<  " ,yaw:"  << pkt.yaw << " ,距离:" << pkt.distance <<endl;
                 std::cout  <<"----------------------------------------------------------------" <<  std::endl;

@@ -63,6 +63,7 @@ GimbalCmd Solver::solve(DetectResult& target, float curr_yaw, float curr_pitch, 
     float ty = (float)tvec.at<double>(1);
     float tz = (float)tvec.at<double>(2);
     Eigen::Vector3f P_cam(tz, -tx, -ty); 
+    std::cout << "P_cam: x=" << P_cam.x() << ", y=" << P_cam.y() << ", z=" << P_cam.z() << std::endl;
 
     Eigen::AngleAxisf yaw_rev(curr_yaw * M_PI / 180.0f, Eigen::Vector3f::UnitZ());
     Eigen::AngleAxisf pitch_rev(curr_pitch * M_PI / 180.0f, Eigen::Vector3f::UnitY());
