@@ -39,7 +39,7 @@ bool has_crazy_exponent(float val) {
         // 提取 e 后面的指数部分，例如 "+02" 或 "-37"
         int exponent = std::stoi(s.substr(e_pos + 1));
         // 如果指数绝对值大于 10，基本就是错码
-        if (std::abs(exponent) > 10) return true;
+        if (std::abs(exponent) > 100) return true;
     }
     return false;
 }
@@ -96,10 +96,10 @@ void serial_task(SerialDriver* serial) {
 
 int main() {
     // 1. 先初始化管家，指定你的 config.yaml 绝对路径
-    ConfigManager::getInstance().init("/home/lenzmj/ws/radar/ambution_radar_aim/config/config.yaml");
+    ConfigManager::getInstance().init("/home/lenzmj/ws/ambition_radar/config/config.yaml");
     auto& cfg = ConfigManager::getInstance();
 
-    // 2. 初始化相机
+    // 2. 初始化相机uint8_t reserved = 0; // 补齐 16 字节
     HikDriver camera;
     if (!camera.connect()) {
         cout << "Camera Connect Failed!" << endl;
@@ -142,7 +142,8 @@ int main() {
 
         float real_yaw = latest_real_yaw.load();
         float real_pitch = latest_real_pitch.load();
-       // std::cout << "yaw:" << real_yaw <<"  pitch:" << real_pitch <<  std::endl;
+        std::cout  <<"----------------------------------------------------------------" <<  std::endl;
+        std::cout << "yaw:" << real_yaw <<"  pitch:" << real_pitch <<  std::endl;
         if (has_new_frame)
         {
             frame_mtx.lock();
@@ -192,7 +193,8 @@ int main() {
                 pkt.yaw = cmd.target_yaw;
                 pkt.distance = cmd.p_world_z;
                 serial.send_packet(pkt);
-                // cout <<  "pitch:" << pkt.pitch  <<  " ,yaw:"  << pkt.yaw << " ,距离:" << pkt.distance <<endl;
+                cout <<  "pitch:" << pkt.pitch  <<  " ,yaw:"  << pkt.yaw << " ,距离:" << pkt.distance <<endl;
+                std::cout  <<"----------------------------------------------------------------" <<  std::endl;
             }
 
             imshow("Pikachu View", local_frame);

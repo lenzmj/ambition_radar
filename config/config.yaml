@@ -1,7 +1,7 @@
 # 1. 通信与模型路径配置
 hardware: 
   serial_port: "/dev/ttyACM0" 
-  model_path: "/home/lenzmj/ws/radar/ambution_radar_aim/openvino_model/best.xml" 
+  model_path: "/home/lenzmj/ws/ambition_radar/openvino_model/best.xml" 
 
 # 2. 相机内参 (基于你提供的最新标定数据)
 camera: 
