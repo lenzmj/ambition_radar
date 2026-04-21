@@ -181,10 +181,12 @@ int main() {
                 string l1 = "UAV";
                 string l2 = "xyz: (" + to_string(cmd.p_world_x).substr(0, 4) + ", " + to_string(cmd.p_world_y).substr(0, 4) + ", " + to_string(cmd.p_world_z).substr(0, 4) + ")";
                 string l3 = "yaw: " + to_string(cmd.target_yaw).substr(0, 5) + ", pitch: " + to_string(cmd.target_pitch).substr(0, 5) ;
+                string l4 = "r_yaw: " + to_string(real_yaw).substr(0, 5) + ", r_pitch: " + to_string(real_pitch).substr(0, 5) ;
 
                 putText(local_frame, l1, Point(obj.box.x, obj.box.y - 40), FONT_HERSHEY_SIMPLEX, 0.7, draw_color, 2);
                 putText(local_frame, l2, Point(obj.box.x, obj.box.y - 20), FONT_HERSHEY_SIMPLEX, 0.6, draw_color, 1);
                 putText(local_frame, l3, Point(obj.box.x, obj.box.y - 5), FONT_HERSHEY_SIMPLEX, 0.6, draw_color, 1);
+                putText(local_frame, l4, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.6, draw_color, 1);
 
                 // 4. 封装并发送
                 SendPacket pkt;

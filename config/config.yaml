@@ -1,15 +1,22 @@
 # 1. 通信与模型路径配置
 hardware: 
   serial_port: "/dev/ttyACM0" 
-  model_path: "/home/lenzmj/ws/ambition_radar/openvino_model/best.xml" 
+  model_path: "/home/lenzmj/ws/ambition_radar/openvino_model/blue.xml" 
 
 # 2. 相机内参 (基于你提供的最新标定数据)
-camera: 
-  fx: 20336.719976   
-  fy: 20335.110626
-  cx: 1533.592584
-  cy: 1047.940073
-  dist_coeffs: [1.132135, -97.156271, -0.001498, -0.001629, 0.0]
+
+camera:
+  # fx, fy 大约为原值的 15% (20336 * 0.15 ≈ 3050)
+  fx: 3050.5
+  fy: 3050.2
+  
+  # 主点坐标保持在 3072x2048 分辨率的中心附近即可 
+  cx: 1536.0
+  cy: 1024.0
+  
+  # 6mm 广角镜头的畸变通常较明显，建议先置零或使用通用小值
+  # 原先 40mm 的畸变参数 (-97.15) 绝对不能用，会导致画面严重扭曲
+  dist_coeffs: [0.0, 0.0, 0.0, 0.0, 0.0]
 
 # 3. 目标物理尺寸 (单位: 米)
 # 针对你提到的 13cm x 13cm 目标，建议将 width/height 设为 0.13

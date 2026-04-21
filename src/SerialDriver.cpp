@@ -4,17 +4,28 @@
 
 
 SerialDriver::SerialDriver(const char* port) {
+    // 以读写、非控制终端、非阻塞模式打开串口
     fd = open(port, O_RDWR | O_NOCTTY | O_NDELAY);
     struct termios options;
     tcgetattr(fd, &options);
-    cfsetispeed(&options, B115200);
-    cfsetospeed(&options, B115200);
+
+    /* * 修改部分：波特率调整
+     * 原代码：cfsetispeed(&options, B115200); cfsetospeed(&options, B115200);
+     * 电控需求，将波特率提升至 921600。
+     * 这可以减少串口传输一帧数据的时间，从而降低控制链路的延迟（Latency）。
+     */
+    cfsetispeed(&options, B921600);
+    cfsetospeed(&options, B921600);
+
     options.c_cflag |= (CLOCAL | CREAD);
+    // 设置为原始模式（Raw Mode），关闭回显和标准输入处理
     options.c_lflag &= ~(ICANON | ECHO | ECHOE | ISIG);
     tcsetattr(fd, TCSANOW, &options);
 }
 
-SerialDriver::~SerialDriver() { if (fd != -1) close(fd); }
+SerialDriver::~SerialDriver() { 
+    if (fd != -1) close(fd); 
+}
 
 void SerialDriver::send_packet(const SendPacket& pkt) {
     if (fd != -1) {
@@ -46,8 +57,7 @@ bool SerialDriver::receive_packet(ReceivePacket& in_pkt) {
                 total_read += n;
             }
             
-
-            //check_crc16 函数自动取 buffer 最后两个字节与前面的数据计算结果进行比对
+            // check_crc16 函数自动取 buffer 最后两个字节与前面的数据计算结果进行比对
             if (!tools::check_crc16(buffer, sizeof(ReceivePacket))) {
                 // 如果验证失败，说明通信出现误码或断帧，直接 return false 丢弃该包
                 return false; 
@@ -62,7 +72,7 @@ bool SerialDriver::receive_packet(ReceivePacket& in_pkt) {
 
 void SerialDriver::flush_input() {
     if (fd != -1) {
-        // TCIFLUSH 表示清空收到的但还没读的数据
+        // TCIFLUSH 表示清空收到的但还没读的数据，防止高频传输下堆积旧指令
         tcflush(fd, TCIFLUSH); 
     }
 }
