@@ -7,6 +7,8 @@ file(REMOVE_RECURSE
   "CMakeFiles/app.dir/src/crc.cpp.o.d"
   "CMakeFiles/app.dir/src/detector.cpp.o"
   "CMakeFiles/app.dir/src/detector.cpp.o.d"
+  "CMakeFiles/app.dir/src/draw.cpp.o"
+  "CMakeFiles/app.dir/src/draw.cpp.o.d"
   "CMakeFiles/app.dir/src/main.cpp.o"
   "CMakeFiles/app.dir/src/main.cpp.o.d"
   "CMakeFiles/app.dir/src/solver.cpp.o"

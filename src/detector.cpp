@@ -19,8 +19,7 @@ Detector::Detector(const string& model_path) {
 
 vector<DetectResult> Detector::run_yolo(Mat& frame) {
     auto& cfg = ConfigManager::getInstance();
-    // 实时读取 YAML 中的配置
-  // 必须对应 YAML 里的 params 节点
+    // 读取 YAML 中的配置
     float yaml_conf = cfg.get<float>("params.conf_threshold", 0.6f);
     float yaml_alpha = cfg.get<float>("params.det_alpha", 0.1f); 
 
@@ -55,23 +54,35 @@ vector<DetectResult> Detector::run_yolo(Mat& frame) {
         }
     }
 
-    if (best_idx != -1) {
-        float cx = data[0 * rows + best_idx] * scale_x;
-        float cy = data[1 * rows + best_idx] * scale_y;
-        float h  = data[2 * rows + best_idx] * scale_x;
-        float w  = data[3 * rows + best_idx] * scale_y;
+   if (best_idx != -1) {
+       
+        // 获取网络在 640x640 尺度下的原始输出
+        float cx_net = data[0 * rows + best_idx];
+        float cy_net = data[1 * rows + best_idx];
+        float w_net  = data[2 * rows + best_idx]; 
+        float h_net  = data[3 * rows + best_idx]; 
 
         float angle_rad = data[(dimensions - 1) * rows + best_idx];
-        float angle_deg = (angle_rad * 180.0f / CV_PI) - 45.0f; 
+        float angle_deg = (angle_rad * 180.0f / CV_PI); 
 
-        RotatedRect rrect(Point2f(cx, cy), Size2f(w, h), angle_deg);
-        Point2f pts[4];
-        rrect.points(pts); 
+        // 在 640x640 的尺度下构建 RotatedRect，并提取 4 个角点
+        RotatedRect rrect_net(Point2f(cx_net, cy_net), Size2f(w_net, h_net), angle_deg);
+        Point2f pts_net[4];
+        rrect_net.points(pts_net); 
 
         DetectResult current;
         current.corners.clear();
-        for(int j=0; j<4; j++) current.corners.push_back(pts[j]);
-        current.box = rrect.boundingRect();
+        
+        // 对提取出来的 4 个角点分别进行 X 和 Y 的映射缩放
+        for(int j = 0; j < 4; j++) {
+            Point2f pt_original;
+            pt_original.x = pts_net[j].x * scale_x;
+            pt_original.y = pts_net[j].y * scale_y;
+            current.corners.push_back(pt_original);
+        }
+        
+        //  使用映射后的角点重新计算正交包围框 (用于后续的 box 绘制和判断)
+        current.box = boundingRect(current.corners);
 
         if (!has_history) {
             last_res = current;

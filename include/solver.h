@@ -16,6 +16,7 @@ struct GimbalCmd {
 
 class Solver {
 public:
+
     Solver();
     GimbalCmd solve(DetectResult& target, float curr_yaw, float curr_pitch, float curr_roll = 0.0f);
     void reset_filter(); // 目标长时间消失后重置滤波器
@@ -23,6 +24,11 @@ public:
     cv::Mat camera_matrix;
     Eigen::Vector3f cam_offset;
     Eigen::Vector3f ray_offset;
+
+private:
+
+    cv::Mat dist_coeffs;
+    std::vector<cv::Point3f> object_3d_points;  
 
     // --- 滤波相关 ---
     float last_yaw;
@@ -32,3 +38,4 @@ public:
 };
 
 #endif
+

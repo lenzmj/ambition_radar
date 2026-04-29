@@ -10,6 +10,7 @@
 #include "Protocol.h"
 #include "SerialDriver.h"
 #include "yaml.hpp"
+#include "draw.h"
 
 using namespace std;
 using namespace cv;
@@ -39,12 +40,12 @@ bool has_crazy_exponent(float val) {
         // 提取 e 后面的指数部分，例如 "+02" 或 "-37"
         int exponent = std::stoi(s.substr(e_pos + 1));
         // 如果指数绝对值大于 10，基本就是错码
-        if (std::abs(exponent) > 100) return true;
+        if (std::abs(exponent) > 10) return true;
     }
     return false;
 }
 
-// --- 取图线程函数 ---
+// --- 取图线程 ---
 void capture_task(HikDriver* cam) {
     Mat tmp_frame;
     auto last_success_time = std::chrono::steady_clock::now();
@@ -99,7 +100,7 @@ int main() {
     ConfigManager::getInstance().init("/home/lenzmj/ws/ambition_radar/config/config.yaml");
     auto& cfg = ConfigManager::getInstance();
 
-    // 2. 初始化相机uint8_t reserved = 0; // 补齐 16 字节
+    // 2. 初始化相机
     HikDriver camera;
     if (!camera.connect()) {
         cout << "Camera Connect Failed!" << endl;
@@ -119,11 +120,13 @@ int main() {
 
     
     Solver math_solver;
+    Visualizer drawer; // 绘图
 
-    // 独立串口线程
+    // 独立接收串口线程
     thread t_serial(serial_task, &serial);
     // 独立取图线程
     thread t_capture(capture_task, &camera);
+
 
     Mat local_frame;
     namedWindow("Pikachu View", WINDOW_NORMAL);
@@ -150,8 +153,13 @@ int main() {
             shared_frame.copyTo(local_frame);
             has_new_frame = false;
             frame_mtx.unlock();
+        
+            // --- 无论是否发现目标，都绘制激光理论点 ---
+            drawer.draw_laser_dot(local_frame, math_solver.camera_matrix, 
+                                 math_solver.cam_offset, math_solver.ray_offset);
 
             vector<DetectResult> results = pikachu_ai.run_yolo(local_frame);
+            
 
             for (auto &obj : results)
             {
@@ -159,36 +167,11 @@ int main() {
 
                 GimbalCmd cmd = math_solver.solve(results[0], real_yaw, real_pitch, 0.0f);
 
-                // 2. 绘图：改用旋转矩形的 4 个角点绘制
-                Scalar draw_color = cmd.is_locked ? Scalar(0, 255, 0) : Scalar(255, 255, 255);
+                // 2. 绘制（解算结果 + 视觉反馈）
 
-                // 绘制旋转矩形的四条边
-                for (int j = 0; j < 4; j++)
-                {
-                    line(local_frame, obj.corners[j], obj.corners[(j + 1) % 4], draw_color, 2);
-                }
+                drawer.draw_results(local_frame, obj, cmd, real_yaw, real_pitch);
 
-                // 绘制角点序号
-                for (int j = 0; j < 4; j++)
-                {
-                    putText(local_frame, to_string(j), obj.corners[j], FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 255, 0), 2);
-                }
-
-                // 绘制中心点
-                circle(local_frame, Point(obj.box.x + obj.box.width / 2, obj.box.y + obj.box.height / 2), 3, Scalar(0, 0, 255), -1);
-
-                // 3. 文本显示
-                string l1 = "UAV";
-                string l2 = "xyz: (" + to_string(cmd.p_world_x).substr(0, 4) + ", " + to_string(cmd.p_world_y).substr(0, 4) + ", " + to_string(cmd.p_world_z).substr(0, 4) + ")";
-                string l3 = "yaw: " + to_string(cmd.target_yaw).substr(0, 5) + ", pitch: " + to_string(cmd.target_pitch).substr(0, 5) ;
-                string l4 = "r_yaw: " + to_string(real_yaw).substr(0, 5) + ", r_pitch: " + to_string(real_pitch).substr(0, 5) ;
-
-                putText(local_frame, l1, Point(obj.box.x, obj.box.y - 40), FONT_HERSHEY_SIMPLEX, 0.7, draw_color, 2);
-                putText(local_frame, l2, Point(obj.box.x, obj.box.y - 20), FONT_HERSHEY_SIMPLEX, 0.6, draw_color, 1);
-                putText(local_frame, l3, Point(obj.box.x, obj.box.y - 5), FONT_HERSHEY_SIMPLEX, 0.6, draw_color, 1);
-                putText(local_frame, l4, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.6, draw_color, 1);
-
-                // 4. 封装并发送
+                // 3. 封装并发送
                 SendPacket pkt;
                 pkt.mode = 1;
                 pkt.pitch = cmd.target_pitch;

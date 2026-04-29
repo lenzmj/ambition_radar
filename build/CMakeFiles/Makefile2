@@ -85,12 +85,12 @@ clean: CMakeFiles/app.dir/clean
 CMakeFiles/app.dir/all:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/depend
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target app"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Built target app"
 .PHONY : CMakeFiles/app.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/app.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/lenzmj/ws/ambition_radar/build/CMakeFiles 7
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/lenzmj/ws/ambition_radar/build/CMakeFiles 8
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/Makefile2 CMakeFiles/app.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/lenzmj/ws/ambition_radar/build/CMakeFiles 0
 .PHONY : CMakeFiles/app.dir/rule
@@ -102,7 +102,7 @@ app: CMakeFiles/app.dir/rule
 # codegen rule for target.
 CMakeFiles/app.dir/codegen:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/codegen
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Finished codegen for target app"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=1,2,3,4,5,6,7,8 "Finished codegen for target app"
 .PHONY : CMakeFiles/app.dir/codegen
 
 # clean rule for target.

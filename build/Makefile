@@ -225,6 +225,30 @@ src/detector.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/detector.cpp.s
 .PHONY : src/detector.cpp.s
 
+src/draw.o: src/draw.cpp.o
+.PHONY : src/draw.o
+
+# target to build an object file
+src/draw.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/draw.cpp.o
+.PHONY : src/draw.cpp.o
+
+src/draw.i: src/draw.cpp.i
+.PHONY : src/draw.i
+
+# target to preprocess a source file
+src/draw.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/draw.cpp.i
+.PHONY : src/draw.cpp.i
+
+src/draw.s: src/draw.cpp.s
+.PHONY : src/draw.s
+
+# target to generate assembly for a file
+src/draw.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/draw.cpp.s
+.PHONY : src/draw.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -294,6 +318,9 @@ help:
 	@echo "... src/detector.o"
 	@echo "... src/detector.i"
 	@echo "... src/detector.s"
+	@echo "... src/draw.o"
+	@echo "... src/draw.i"
+	@echo "... src/draw.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"
