@@ -20,10 +20,7 @@ public:
     GimbalCmd solve(DetectResult& target, float curr_yaw, float curr_pitch, float curr_roll = 0.0f);
     void reset_filter(); // 目标长时间消失后重置滤波器
 
-private:
     cv::Mat camera_matrix;
-    cv::Mat dist_coeffs;
-    std::vector<cv::Point3f> object_3d_points;
     Eigen::Vector3f cam_offset;
     Eigen::Vector3f ray_offset;
 
