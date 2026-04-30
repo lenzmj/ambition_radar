@@ -41,7 +41,7 @@ void Visualizer::draw_results(Mat &frame, const DetectResult &obj, const GimbalC
 }
 
 void Visualizer::draw_laser_dot(Mat &frame, const Mat &cam_matrix,
-                                const Eigen::Vector3f &cam_offset, const Eigen::Vector3f &ray_offset)
+                                const Eigen::Vector3f &cam_offset, const Eigen::Vector3f &ray_offset,float p_world_x)
 {
     // 激光器相对于相机的偏移（相机系定义下的位移）
     Eigen::Vector3f rel_offset = ray_offset - cam_offset;
@@ -52,7 +52,7 @@ void Visualizer::draw_laser_dot(Mat &frame, const Mat &cam_matrix,
     double cy = cam_matrix.at<double>(1, 2);
 
     // 设定 15 米参考点
-    float dist = 15.0f;
+    float dist = p_world_x;
 
     // --- 修改点：根据 Solver 的映射逻辑反向投影 ---
     // Solver 定义: Eigen_x = Cam_z, Eigen_y = -Cam_x, Eigen_z = -Cam_y

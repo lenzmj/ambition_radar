@@ -22,28 +22,12 @@ atomic<bool> is_running(true);
 atomic<bool> has_new_frame(false); 
 atomic<float> latest_real_yaw(0.0f);
 atomic<float> latest_real_pitch(0.0f);
+float distance_d = 15.0f; // 默认距离
 
 
 
 
 
-
-// --- 接收校验函数（e判断） ---
-bool has_crazy_exponent(float val) {
-    char buf[32];
-    // 使用 %e 强制转为科学计数法，例如 1.234567e+02
-    snprintf(buf, sizeof(buf), "%e", val);
-    std::string s(buf);
-    
-    size_t e_pos = s.find('e');
-    if (e_pos != std::string::npos) {
-        // 提取 e 后面的指数部分，例如 "+02" 或 "-37"
-        int exponent = std::stoi(s.substr(e_pos + 1));
-        // 如果指数绝对值大于 10，基本就是错码
-        if (std::abs(exponent) > 10) return true;
-    }
-    return false;
-}
 
 // --- 取图线程 ---
 void capture_task(HikDriver* cam) {
@@ -81,11 +65,6 @@ void serial_task(SerialDriver* serial) {
     ReceivePacket rec;
     while (is_running) {
         if (serial->receive_packet(rec)) {
-            // 校验：如果是脏数据则清空并跳过
-            if (has_crazy_exponent(rec.current_pitch) || has_crazy_exponent(rec.current_yaw)) {
-                serial->flush_input();
-                continue;
-            }
             // 更新原子变量，保证主循环随时读取到最新值
             latest_real_yaw = rec.current_yaw;
             latest_real_pitch = rec.current_pitch;
@@ -94,6 +73,7 @@ void serial_task(SerialDriver* serial) {
         std::this_thread::sleep_for(std::chrono::microseconds(500));
     }
 }
+
 
 int main() {
     // 1. 先初始化管家，指定你的 config.yaml 绝对路径
@@ -156,7 +136,7 @@ int main() {
         
             // --- 无论是否发现目标，都绘制激光理论点 ---
             drawer.draw_laser_dot(local_frame, math_solver.camera_matrix, 
-                                 math_solver.cam_offset, math_solver.ray_offset);
+                                 math_solver.cam_offset, math_solver.ray_offset,distance_d);
 
             vector<DetectResult> results = pikachu_ai.run_yolo(local_frame);
             
@@ -166,6 +146,7 @@ int main() {
                 // 1. 解算
 
                 GimbalCmd cmd = math_solver.solve(results[0], real_yaw, real_pitch, 0.0f);
+                distance_d = cmd.p_world_x; // 更新全局距离变量，供绘制函数使用
 
                 // 2. 绘制（解算结果 + 视觉反馈）
 

@@ -249,6 +249,30 @@ src/draw.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/draw.cpp.s
 .PHONY : src/draw.cpp.s
 
+src/extended_kalman_filter.o: src/extended_kalman_filter.cpp.o
+.PHONY : src/extended_kalman_filter.o
+
+# target to build an object file
+src/extended_kalman_filter.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/extended_kalman_filter.cpp.o
+.PHONY : src/extended_kalman_filter.cpp.o
+
+src/extended_kalman_filter.i: src/extended_kalman_filter.cpp.i
+.PHONY : src/extended_kalman_filter.i
+
+# target to preprocess a source file
+src/extended_kalman_filter.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/extended_kalman_filter.cpp.i
+.PHONY : src/extended_kalman_filter.cpp.i
+
+src/extended_kalman_filter.s: src/extended_kalman_filter.cpp.s
+.PHONY : src/extended_kalman_filter.s
+
+# target to generate assembly for a file
+src/extended_kalman_filter.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/extended_kalman_filter.cpp.s
+.PHONY : src/extended_kalman_filter.cpp.s
+
 src/main.o: src/main.cpp.o
 .PHONY : src/main.o
 
@@ -321,6 +345,9 @@ help:
 	@echo "... src/draw.o"
 	@echo "... src/draw.i"
 	@echo "... src/draw.s"
+	@echo "... src/extended_kalman_filter.o"
+	@echo "... src/extended_kalman_filter.i"
+	@echo "... src/extended_kalman_filter.s"
 	@echo "... src/main.o"
 	@echo "... src/main.i"
 	@echo "... src/main.s"

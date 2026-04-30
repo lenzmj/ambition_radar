@@ -21,8 +21,9 @@ public:
      * @param cam_offset 相机相对于云台轴中心偏移 [x, y, z] (Eigen坐标系: 深度, 横向, 纵向)
      * @param ray_offset 激光相对于云台轴中心偏移
      */
-    void draw_laser_dot(cv::Mat& frame, const cv::Mat& cam_matrix, 
-                        const Eigen::Vector3f& cam_offset, const Eigen::Vector3f& ray_offset);
+void draw_laser_dot(cv::Mat& frame, const cv::Mat& cam_matrix, 
+                        const Eigen::Vector3f& cam_offset, const Eigen::Vector3f& ray_offset,
+                        float p_world_x);
 
 private:
     cv::Scalar locked_color;
