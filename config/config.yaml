@@ -5,6 +5,7 @@ hardware:
   backend: "openvino"
   
   serial_port: "/dev/ttyACM0" 
+ # model_path: "/home/lenzmj/ws/ambition_radar/openvino_model/red.xml" 
   model_path: "/home/lenzmj/ws/ambition_radar/openvino_model/best.xml" 
 
 # 2. 相机内参 (严格匹配你提供的标定数据)
@@ -47,8 +48,8 @@ params:
 # 注意：这些值是相机/激光相对于云台旋转中心的物理距离
 offset:
   # 请根据实际机械安装位置测量并微调
-  cam_to_gimbal: [0.0, 0.01, 0.0575]
-  ray_to_gimbal: [0.0, -0.005, 0.075]
+  cam_to_gimbal: [0.0001, -0.00, 0.08]
+  ray_to_gimbal: [-0.00706, -0.00, 0.1065]
   
   
   

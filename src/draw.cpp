@@ -61,7 +61,7 @@ void Visualizer::draw_laser_dot(Mat &frame, const Mat &cam_matrix,
     float x_cam = -rel_offset.y();
     float y_cam = -rel_offset.z();
 
-    if (z_cam > 0.1) {
+    if (z_cam > 0) {
         float u = (float)(fx * (x_cam / z_cam) + cx);
         float v = (float)(fy * (y_cam / z_cam) + cy);
 
