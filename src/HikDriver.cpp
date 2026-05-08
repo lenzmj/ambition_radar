@@ -17,27 +17,17 @@ HikDriver::~HikDriver() {
 bool HikDriver::connect() {
     int res = MV_OK;
     MV_CC_DEVICE_INFO_LIST device_list;
-
-    // 枚举所有USB和网口相机
     res = MV_CC_EnumDevices(MV_USB_DEVICE | MV_GIGE_DEVICE, &device_list);
-    if (device_list.nDeviceNum == 0) {
-        cout << "[Driver] No camera found." << endl;
-        return false;
-    }
+    if (device_list.nDeviceNum == 0) return false;
 
-    // 创建句柄
     res = MV_CC_CreateHandle(&handle, device_list.pDeviceInfo[0]);
     if (res != MV_OK) return false;
 
-    // 打开
     res = MV_CC_OpenDevice(handle);
     if (res != MV_OK) return false;
 
-    // 开始取流
     MV_CC_StartGrabbing(handle);
-    
     is_connected = true;
-    cout << "[Driver] Camera connected." << endl;
     return true;
 }
 
@@ -52,24 +42,29 @@ void HikDriver::close_camera() {
 }
 
 int HikDriver::convert_to_mat(MV_FRAME_OUT_INFO_EX* info, unsigned char* data, Mat& dst) {
-    // 处理 BayerRG8 
     if (info->enPixelType == PixelType_Gvsp_BayerRG8) {
         Mat bayer(info->nHeight, info->nWidth, CV_8UC1, data);
-        
         cvtColor(bayer, dst, COLOR_BayerRG2RGB); 
     }
-
     return 0;
 }
 
-bool HikDriver::get_frame(Mat& output_img) {
+// 修改：重写 get_frame 函数，在图像成功获取的时刻记录系统时间[cite: 2]
+bool HikDriver::get_frame(Mat& output_img, uint64_t& timestamp) {
     if (!is_connected) return false;
 
     MV_FRAME_OUT out_frame = {0};
-    int res = MV_CC_GetImageBuffer(handle, &out_frame, 1000); // 1000ms超时
+    // 1000ms超时。这里是图像从相机传输到PC内存的观测点[cite: 2]
+    int res = MV_CC_GetImageBuffer(handle, &out_frame, 1000);
 
     if (res == MV_OK) {
         convert_to_mat(&out_frame.stFrameInfo, out_frame.pBufAddr, output_img);
+        
+        // 修改原因：获取 steady_clock 的当前毫秒数作为图像的时间坐标。
+        // 这代表了这帧画面“被看到”的时刻，用于后续匹配云台角度[cite: 3]
+        timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count();
+
         MV_CC_FreeImageBuffer(handle, &out_frame);
         return true;
     }

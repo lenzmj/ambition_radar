@@ -9,6 +9,7 @@ struct GimbalCmd {
     bool is_locked;
     float target_yaw;
     float target_pitch;
+    float target_roll;
     float p_world_x;
     float p_world_y;
     float p_world_z;

@@ -9,7 +9,7 @@ Visualizer::Visualizer()
     laser_color = Scalar(0, 0, 255);  // 激光理论点显示红色
 }
 
-void Visualizer::draw_results(Mat &frame, const DetectResult &obj, const GimbalCmd &cmd, float real_yaw, float real_pitch)
+void Visualizer::draw_results(Mat &frame, const DetectResult &obj, const GimbalCmd &cmd, float real_yaw, float real_pitch, float real_roll)
 {
     Scalar draw_color = cmd.is_locked ? locked_color : Scalar(255, 255, 255);
     Mat local_frame = frame; 
@@ -32,10 +32,10 @@ void Visualizer::draw_results(Mat &frame, const DetectResult &obj, const GimbalC
     string l1 = "UAV";
     string l2 = "xyz: (" + to_string(cmd.p_world_x).substr(0, 4) + ", " + to_string(cmd.p_world_y).substr(0, 4) + ", " + to_string(cmd.p_world_z).substr(0, 4) + ")";
     string l3 = "yaw: " + to_string(cmd.target_yaw).substr(0, 5) + ", pitch: " + to_string(cmd.target_pitch).substr(0, 5);
-    string l4 = "r_yaw: " + to_string(real_yaw).substr(0, 5) + ", r_pitch: " + to_string(real_pitch).substr(0, 5);
+    string l4 = "r_yaw: " + to_string(real_yaw).substr(0, 5) + ", r_pitch: " + to_string(real_pitch).substr(0, 5) + ", r_roll: " + to_string(real_roll).substr(0, 5);
 
-    putText(local_frame, l1, Point(obj.box.x, obj.box.y - 60), FONT_HERSHEY_SIMPLEX, 0.7, draw_color, 2);
-    putText(local_frame, l2, Point(obj.box.x, obj.box.y - 40), FONT_HERSHEY_SIMPLEX, 0.6, draw_color, 1);
+    putText(local_frame, l1, Point(obj.box.x, obj.box.y - 65), FONT_HERSHEY_SIMPLEX, 0.7, draw_color, 2);
+    putText(local_frame, l2, Point(obj.box.x, obj.box.y - 45), FONT_HERSHEY_SIMPLEX, 0.6, draw_color, 1);
     putText(local_frame, l3, Point(obj.box.x, obj.box.y - 25), FONT_HERSHEY_SIMPLEX, 0.6, draw_color, 1);
     putText(local_frame, l4, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.6, draw_color, 1);
 }
