@@ -91,9 +91,7 @@ GimbalCmd Solver::solve(DetectResult& target, float curr_yaw, float curr_pitch, 
 
     cmd.target_yaw = last_yaw;
     cmd.target_pitch = last_pitch;
-
-    // --- 修改部分：补全世界坐标赋值 ---
-    // 之前只写了 p_world_x，现在把 y 和 z 也传回去，解决“y和z一直为0”的问题
+    
     cmd.p_world_x = P_world.x(); // 深度 (前向)
     cmd.p_world_y = P_world.y(); // 横向 (左向)
     cmd.p_world_z = P_world.z(); // 纵向 (上向)
