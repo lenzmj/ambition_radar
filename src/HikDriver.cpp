@@ -8,6 +8,8 @@ using namespace std;
 HikDriver::HikDriver() {
     handle = NULL;
     is_connected = false;
+    exposure_time_us_ = -1.0;
+    gain_db_ = -1.0;
 }
 
 HikDriver::~HikDriver() {
@@ -28,7 +30,35 @@ bool HikDriver::connect() {
 
     MV_CC_StartGrabbing(handle);
     is_connected = true;
+    apply_isp_settings();
     return true;
+}
+
+void HikDriver::set_isp_from_config(double exposure_time_us, double gain_db) {
+    exposure_time_us_ = exposure_time_us;
+    gain_db_ = gain_db;
+    apply_isp_settings();
+}
+
+void HikDriver::apply_isp_settings() {
+    if (!is_connected || handle == NULL)
+        return;
+    if (exposure_time_us_ >= 0.0) {
+        int r = MV_CC_SetExposureAutoMode(handle, MV_EXPOSURE_AUTO_MODE_OFF);
+        if (r != MV_OK)
+            std::cerr << "[HikDriver] MV_CC_SetExposureAutoMode failed: " << r << std::endl;
+        r = MV_CC_SetExposureTime(handle, static_cast<float>(exposure_time_us_));
+        if (r != MV_OK)
+            std::cerr << "[HikDriver] MV_CC_SetExposureTime failed: " << r << std::endl;
+    }
+    if (gain_db_ >= 0.0) {
+        int r = MV_CC_SetGainMode(handle, MV_GAIN_MODE_OFF);
+        if (r != MV_OK)
+            std::cerr << "[HikDriver] MV_CC_SetGainMode failed: " << r << std::endl;
+        r = MV_CC_SetGain(handle, static_cast<float>(gain_db_));
+        if (r != MV_OK)
+            std::cerr << "[HikDriver] MV_CC_SetGain failed: " << r << std::endl;
+    }
 }
 
 void HikDriver::close_camera() {

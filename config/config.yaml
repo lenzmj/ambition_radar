@@ -1,23 +1,23 @@
 # 1. 通信与模型路径配置
 hardware: 
 
-# 选项: "openvino" 或 "tensorrt"
-  backend: "openvino"
-  
   serial_port: "/dev/ttyACM0" 
  # model_path: "/home/lenzmj/ws/ambition_radar/openvino_model/red.xml" 
   model_path: "/home/lenzmj/ws/ambition_radar/openvino_model/best.xml" 
 
-# 2. 相机内参 (严格匹配你提供的标定数据)
-# 这些参数直接决定了 PnP 解算出的目标距离是否准确 
+# 2. 相机内参 
 camera:
   fx: 2571.733658
   fy: 2571.231411
   cx: 1444.710774
   cy: 1088.514647
   
-  # 填入标定得到的畸变系数 [k1, k2, p1, p2, k3] 
+  # 畸变系数 [k1, k2, p1, p2, k3] 
   dist_coeffs: [-0.040624, 0.045286, 0.002100, -0.006427, 0.0]
+
+  # 任一项为负数或不写（代码默认 -1）则跳过，保持相机当前/自动设置。
+  exposure_time_us: 3000
+  gain: 20
 
 # 3. 目标物理尺寸 (单位: 米)
 # 针对你提到的 60mm x 65mm 目标，必须修改此处 

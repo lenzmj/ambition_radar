@@ -96,6 +96,9 @@ int main() {
     auto& cfg = ConfigManager::getInstance();
 
     HikDriver camera;
+    camera.set_isp_from_config(
+        cfg.get<double>("camera.exposure_time_us", -1.0),
+        cfg.get<double>("camera.gain", -1.0));
     if (!camera.connect()) return -1;
 
     string port = cfg.get<string>("hardware.serial_port", "");
@@ -175,6 +178,8 @@ int main() {
                 pkt.distance = cmd.p_world_x;
                 serial.send_packet(pkt);
             }
+
+            drawer.draw_display_fps(local_frame);
 
             imshow("Pikachu View", local_frame);
         }

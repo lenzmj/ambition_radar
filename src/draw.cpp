@@ -4,9 +4,27 @@ using namespace cv;
 using namespace std;
 
 Visualizer::Visualizer()
+    : fps_tick_(std::chrono::steady_clock::now()), fps_counter_(0), display_fps_(0.0)
 {
     locked_color = Scalar(0, 255, 0); // 锁定显示绿色
     laser_color = Scalar(0, 0, 255);  // 激光理论点显示红色
+}
+
+void Visualizer::draw_display_fps(Mat& frame)
+{
+    fps_counter_++;
+    auto now = std::chrono::steady_clock::now();
+    double dt = std::chrono::duration<double>(now - fps_tick_).count();
+    if (dt >= 0.5) {
+        display_fps_ = static_cast<double>(fps_counter_) / dt;
+        fps_counter_ = 0;
+        fps_tick_ = now;
+    }
+    string label = format("Display FPS: %.1f", display_fps_);
+    int baseline = 0;
+    Size sz = getTextSize(label, FONT_HERSHEY_SIMPLEX, 0.7, 2, &baseline);
+    Point org(frame.cols - sz.width - 10, 28);
+    putText(frame, label, org, FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 255, 0), 2);
 }
 
 void Visualizer::draw_results(Mat &frame, const DetectResult &obj, const GimbalCmd &cmd, float real_yaw, float real_pitch, float real_roll)

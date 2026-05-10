@@ -1,6 +1,7 @@
 #ifndef DRAW_H
 #define DRAW_H
 
+#include <chrono>
 #include <opencv2/opencv.hpp>
 #include <Eigen/Dense>
 #include "detector.h"
@@ -25,9 +26,16 @@ void draw_laser_dot(cv::Mat& frame, const cv::Mat& cam_matrix,
                         const Eigen::Vector3f& cam_offset, const Eigen::Vector3f& ray_offset,
                         float p_world_x);
 
+    /** 统计并叠加显示刷新帧率（主线程每次 imshow 前调用一次） */
+    void draw_display_fps(cv::Mat& frame);
+
 private:
     cv::Scalar locked_color;
     cv::Scalar laser_color;
+
+    std::chrono::steady_clock::time_point fps_tick_;
+    int fps_counter_;
+    double display_fps_;
 };
 
 #endif
