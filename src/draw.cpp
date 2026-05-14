@@ -1,4 +1,5 @@
 #include "draw.h"
+#include <cmath>
 
 using namespace cv;
 using namespace std;
@@ -48,9 +49,9 @@ void Visualizer::draw_results(Mat &frame, const DetectResult &obj, const GimbalC
 
     // 文本显示
     string l1 = "UAV";
-    string l2 = "xyz: (" + to_string(cmd.p_world_x).substr(0, 4) + ", " + to_string(cmd.p_world_y).substr(0, 4) + ", " + to_string(cmd.p_world_z).substr(0, 4) + ")";
-    string l3 = "yaw: " + to_string(cmd.target_yaw).substr(0, 5) + ", pitch: " + to_string(cmd.target_pitch).substr(0, 5);
-    string l4 = "r_yaw: " + to_string(real_yaw).substr(0, 5) + ", r_pitch: " + to_string(real_pitch).substr(0, 5) + ", r_roll: " + to_string(real_roll).substr(0, 5);
+    string l2 = "xyz: (" + to_string(cmd.p_world_x).substr(0, 5) + ", " + to_string(cmd.p_world_y).substr(0, 5) + ", " + to_string(cmd.p_world_z).substr(0, 5) + ")";
+    string l3 = "yaw: " + to_string(cmd.target_yaw).substr(0, 7) + ", pitch: " + to_string(cmd.target_pitch).substr(0, 7);
+    string l4 = "r_yaw: " + to_string(real_yaw).substr(0, 7) + ", r_pitch: " + to_string(real_pitch).substr(0, 7) + ", r_roll: " + to_string(real_roll).substr(0, 7);
 
     putText(local_frame, l1, Point(obj.box.x, obj.box.y - 65), FONT_HERSHEY_SIMPLEX, 0.7, draw_color, 2);
     putText(local_frame, l2, Point(obj.box.x, obj.box.y - 45), FONT_HERSHEY_SIMPLEX, 0.6, draw_color, 1);
@@ -59,33 +60,45 @@ void Visualizer::draw_results(Mat &frame, const DetectResult &obj, const GimbalC
 }
 
 void Visualizer::draw_laser_dot(Mat &frame, const Mat &cam_matrix,
-                                const Eigen::Vector3f &cam_offset, const Eigen::Vector3f &ray_offset,float p_world_x)
+                                const Eigen::Vector3f &cam_offset, const Eigen::Vector3f &ray_offset,
+                                const Eigen::Matrix3f &R_cam_to_ray,
+                                float pnp_tx, float pnp_ty, float pnp_tz)
 {
-    // 激光器相对于相机的偏移（相机系定义下的位移）
-    Eigen::Vector3f rel_offset = ray_offset - cam_offset;
+    if (pnp_tz <= 1e-4f) return;
+
+    // Eigen 机体 <-> OpenCV 相机系：与 Solver 一致 (Eigen_x=Cam_z, Eigen_y=-Cam_x, Eigen_z=-Cam_y)
+    auto eigen_to_cam = [](const Eigen::Vector3f &v) -> Eigen::Vector3f {
+        return Eigen::Vector3f(-v.y(), -v.z(), v.x());
+    };
+
+    Eigen::Vector3f rel_e = ray_offset - cam_offset;
+    Eigen::Vector3f ap_cam = eigen_to_cam(rel_e);
+
+    Eigen::Vector3f d_eigen = (R_cam_to_ray.transpose() * Eigen::Vector3f::UnitX()).normalized();
+    Eigen::Vector3f dir_cam = eigen_to_cam(d_eigen);
+    const float dir_norm = dir_cam.norm();
+    if (dir_norm < 1e-6f) return;
+    dir_cam /= dir_norm;
+
+    // PnP 目标中心在 OpenCV 相机系；激光口出发沿 dir_cam，与过目标且法向 ~ 光轴的平面求交（Z = tvec_z）
+    Eigen::Vector3f T_cam(pnp_tx, pnp_ty, pnp_tz);
+    const float denom = dir_cam.z();
+    if (std::fabs(denom) < 1e-6f) return;
+    const float t = (T_cam.z() - ap_cam.z()) / denom;
+    if (t <= 0.0f) return;
+
+    Eigen::Vector3f hit_cam = ap_cam + t * dir_cam;
+    if (hit_cam.z() <= 1e-4f) return;
 
     double fx = cam_matrix.at<double>(0, 0);
     double fy = cam_matrix.at<double>(1, 1);
     double cx = cam_matrix.at<double>(0, 2);
     double cy = cam_matrix.at<double>(1, 2);
 
-    // 设定 15 米参考点
-    float dist = p_world_x;
+    float u = (float)(fx * (hit_cam.x() / hit_cam.z()) + cx);
+    float v = (float)(fy * (hit_cam.y() / hit_cam.z()) + cy);
 
-    // --- 修改点：根据 Solver 的映射逻辑反向投影 ---
-    // Solver 定义: Eigen_x = Cam_z, Eigen_y = -Cam_x, Eigen_z = -Cam_y
-    // 则在相机系下，15米处点的坐标为：
-    float z_cam = dist + rel_offset.x();
-    float x_cam = -rel_offset.y();
-    float y_cam = -rel_offset.z();
-
-    if (z_cam > 0) {
-        float u = (float)(fx * (x_cam / z_cam) + cx);
-        float v = (float)(fy * (y_cam / z_cam) + cy);
-
-        // 绘制准星（红色）
-        line(frame, Point(u - 15, v), Point(u + 15, v), Scalar(0, 0, 255), 1);
-        line(frame, Point(u, v - 15), Point(u, v + 15), Scalar(0, 0, 255), 1);
-        putText(frame, "LASER_REF_15M", Point(u + 10, v - 10), FONT_HERSHEY_SIMPLEX, 0.4, Scalar(0, 0, 255), 0.5);
-    }
+    line(frame, Point(u - 15, v), Point(u + 15, v), Scalar(0, 0, 255), 1);
+    line(frame, Point(u, v - 15), Point(u, v + 15), Scalar(0, 0, 255), 1);
+    putText(frame, "LASER_REF", Point(u + 10, v - 10), FONT_HERSHEY_SIMPLEX, 0.4, Scalar(0, 0, 255), 0.5);
 }

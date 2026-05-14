@@ -13,6 +13,10 @@ struct GimbalCmd {
     float p_world_x;
     float p_world_y;
     float p_world_z;
+    /** solvePnP 平移 tvec（OpenCV 相机系），供激光十字与目标 3D 对齐投影 */
+    float pnp_tx;
+    float pnp_ty;
+    float pnp_tz;
 };
 
 class Solver {
@@ -25,6 +29,8 @@ public:
     cv::Mat camera_matrix;
     Eigen::Vector3f cam_offset;
     Eigen::Vector3f ray_offset;
+    /** 相机系 -> 激光器系：v_ray = R_cam_to_ray * v_cam（列向量）。由 offset.rpy_cam_to_ray [deg] 构造。 */
+    Eigen::Matrix3f R_cam_to_ray;
 
 private:
 

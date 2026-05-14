@@ -184,6 +184,48 @@ CMakeFiles/app.dir/src/solver.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/app.dir/src/solver.cpp.s"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/solver.cpp -o CMakeFiles/app.dir/src/solver.cpp.s
 
+CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o: /home/lenzmj/ws/ambition_radar/src/yolo_backend_openvino.cpp
+CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o -MF CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o.d -o CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o -c /home/lenzmj/ws/ambition_radar/src/yolo_backend_openvino.cpp
+
+CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lenzmj/ws/ambition_radar/src/yolo_backend_openvino.cpp > CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.i
+
+CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/yolo_backend_openvino.cpp -o CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.s
+
+CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o: /home/lenzmj/ws/ambition_radar/src/yolo_backend_tensorrt.cpp
+CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o -MF CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o.d -o CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o -c /home/lenzmj/ws/ambition_radar/src/yolo_backend_tensorrt.cpp
+
+CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lenzmj/ws/ambition_radar/src/yolo_backend_tensorrt.cpp > CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.i
+
+CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/yolo_backend_tensorrt.cpp -o CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.s
+
+CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o: CMakeFiles/app.dir/flags.make
+CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o: /home/lenzmj/ws/ambition_radar/src/yolo_infer_backend.cpp
+CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o -MF CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o.d -o CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o -c /home/lenzmj/ws/ambition_radar/src/yolo_infer_backend.cpp
+
+CMakeFiles/app.dir/src/yolo_infer_backend.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Preprocessing CXX source to CMakeFiles/app.dir/src/yolo_infer_backend.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/lenzmj/ws/ambition_radar/src/yolo_infer_backend.cpp > CMakeFiles/app.dir/src/yolo_infer_backend.cpp.i
+
+CMakeFiles/app.dir/src/yolo_infer_backend.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green "Compiling CXX source to assembly CMakeFiles/app.dir/src/yolo_infer_backend.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/yolo_infer_backend.cpp -o CMakeFiles/app.dir/src/yolo_infer_backend.cpp.s
+
 # Object files for target app
 app_OBJECTS = \
 "CMakeFiles/app.dir/src/HikDriver.cpp.o" \
@@ -193,7 +235,10 @@ app_OBJECTS = \
 "CMakeFiles/app.dir/src/draw.cpp.o" \
 "CMakeFiles/app.dir/src/extended_kalman_filter.cpp.o" \
 "CMakeFiles/app.dir/src/main.cpp.o" \
-"CMakeFiles/app.dir/src/solver.cpp.o"
+"CMakeFiles/app.dir/src/solver.cpp.o" \
+"CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o" \
+"CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o" \
+"CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o"
 
 # External object files for target app
 app_EXTERNAL_OBJECTS =
@@ -206,6 +251,9 @@ app: CMakeFiles/app.dir/src/draw.cpp.o
 app: CMakeFiles/app.dir/src/extended_kalman_filter.cpp.o
 app: CMakeFiles/app.dir/src/main.cpp.o
 app: CMakeFiles/app.dir/src/solver.cpp.o
+app: CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o
+app: CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o
+app: CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o
 app: CMakeFiles/app.dir/build.make
 app: /usr/local/lib/libopencv_gapi.so.4.6.0
 app: /usr/local/lib/libopencv_highgui.so.4.6.0
@@ -217,6 +265,8 @@ app: /usr/local/lib/libopencv_video.so.4.6.0
 app: /usr/local/lib/libopencv_videoio.so.4.6.0
 app: /opt/intel/openvino_2024.6/runtime/lib/intel64/libopenvino.so.2024.6.0
 app: /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.7.0
+app: /usr/lib/x86_64-linux-gnu/libnvinfer.so
+app: /usr/local/cuda-12.8/targets/x86_64-linux/lib/libcudart.so
 app: /usr/local/lib/libopencv_imgcodecs.so.4.6.0
 app: /usr/local/lib/libopencv_dnn.so.4.6.0
 app: /usr/local/lib/libopencv_calib3d.so.4.6.0
@@ -224,8 +274,9 @@ app: /usr/local/lib/libopencv_features2d.so.4.6.0
 app: /usr/local/lib/libopencv_flann.so.4.6.0
 app: /usr/local/lib/libopencv_imgproc.so.4.6.0
 app: /usr/local/lib/libopencv_core.so.4.6.0
+app: /usr/lib/x86_64-linux-gnu/librt.a
 app: CMakeFiles/app.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Linking CXX executable app"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Linking CXX executable app"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/app.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.

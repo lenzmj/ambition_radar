@@ -15,6 +15,12 @@ file(REMOVE_RECURSE
   "CMakeFiles/app.dir/src/main.cpp.o.d"
   "CMakeFiles/app.dir/src/solver.cpp.o"
   "CMakeFiles/app.dir/src/solver.cpp.o.d"
+  "CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o"
+  "CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o.d"
+  "CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o"
+  "CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o.d"
+  "CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o"
+  "CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o.d"
   "app"
   "app.pdb"
 )

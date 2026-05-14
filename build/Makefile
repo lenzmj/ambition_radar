@@ -321,6 +321,78 @@ src/solver.cpp.s:
 	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/solver.cpp.s
 .PHONY : src/solver.cpp.s
 
+src/yolo_backend_openvino.o: src/yolo_backend_openvino.cpp.o
+.PHONY : src/yolo_backend_openvino.o
+
+# target to build an object file
+src/yolo_backend_openvino.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o
+.PHONY : src/yolo_backend_openvino.cpp.o
+
+src/yolo_backend_openvino.i: src/yolo_backend_openvino.cpp.i
+.PHONY : src/yolo_backend_openvino.i
+
+# target to preprocess a source file
+src/yolo_backend_openvino.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.i
+.PHONY : src/yolo_backend_openvino.cpp.i
+
+src/yolo_backend_openvino.s: src/yolo_backend_openvino.cpp.s
+.PHONY : src/yolo_backend_openvino.s
+
+# target to generate assembly for a file
+src/yolo_backend_openvino.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.s
+.PHONY : src/yolo_backend_openvino.cpp.s
+
+src/yolo_backend_tensorrt.o: src/yolo_backend_tensorrt.cpp.o
+.PHONY : src/yolo_backend_tensorrt.o
+
+# target to build an object file
+src/yolo_backend_tensorrt.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o
+.PHONY : src/yolo_backend_tensorrt.cpp.o
+
+src/yolo_backend_tensorrt.i: src/yolo_backend_tensorrt.cpp.i
+.PHONY : src/yolo_backend_tensorrt.i
+
+# target to preprocess a source file
+src/yolo_backend_tensorrt.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.i
+.PHONY : src/yolo_backend_tensorrt.cpp.i
+
+src/yolo_backend_tensorrt.s: src/yolo_backend_tensorrt.cpp.s
+.PHONY : src/yolo_backend_tensorrt.s
+
+# target to generate assembly for a file
+src/yolo_backend_tensorrt.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.s
+.PHONY : src/yolo_backend_tensorrt.cpp.s
+
+src/yolo_infer_backend.o: src/yolo_infer_backend.cpp.o
+.PHONY : src/yolo_infer_backend.o
+
+# target to build an object file
+src/yolo_infer_backend.cpp.o:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o
+.PHONY : src/yolo_infer_backend.cpp.o
+
+src/yolo_infer_backend.i: src/yolo_infer_backend.cpp.i
+.PHONY : src/yolo_infer_backend.i
+
+# target to preprocess a source file
+src/yolo_infer_backend.cpp.i:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/yolo_infer_backend.cpp.i
+.PHONY : src/yolo_infer_backend.cpp.i
+
+src/yolo_infer_backend.s: src/yolo_infer_backend.cpp.s
+.PHONY : src/yolo_infer_backend.s
+
+# target to generate assembly for a file
+src/yolo_infer_backend.cpp.s:
+	$(MAKE) $(MAKESILENT) -f CMakeFiles/app.dir/build.make CMakeFiles/app.dir/src/yolo_infer_backend.cpp.s
+.PHONY : src/yolo_infer_backend.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -354,6 +426,15 @@ help:
 	@echo "... src/solver.o"
 	@echo "... src/solver.i"
 	@echo "... src/solver.s"
+	@echo "... src/yolo_backend_openvino.o"
+	@echo "... src/yolo_backend_openvino.i"
+	@echo "... src/yolo_backend_openvino.s"
+	@echo "... src/yolo_backend_tensorrt.o"
+	@echo "... src/yolo_backend_tensorrt.i"
+	@echo "... src/yolo_backend_tensorrt.s"
+	@echo "... src/yolo_infer_backend.o"
+	@echo "... src/yolo_infer_backend.i"
+	@echo "... src/yolo_infer_backend.s"
 .PHONY : help
 
 

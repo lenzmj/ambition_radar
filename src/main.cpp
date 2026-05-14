@@ -32,7 +32,6 @@ deque<GimbalPose> pose_buffer; // 修改：存储姿态数据的缓冲区
 
 atomic<bool> is_running(true); 
 atomic<bool> has_new_frame(false); 
-float distance_d = 15.0f; 
 
 // --- 取图线程 ---
 void capture_task(HikDriver* cam) {
@@ -104,8 +103,7 @@ int main() {
     string port = cfg.get<string>("hardware.serial_port", "");
     SerialDriver serial(port.c_str());
 
-    string model_path = cfg.get<string>("hardware.model_path", "");
-    Detector pikachu_ai(model_path.c_str()); 
+    Detector pikachu_ai;
 
     Solver math_solver;
     Visualizer drawer;
@@ -127,9 +125,9 @@ int main() {
             frame_mtx.unlock();
 
             // --- 修改部分：时间戳对齐逻辑 ---
-            float matched_yaw = 0.0f;
-            float matched_pitch = 0.0f;
-            float matched_roll = 0.0f;
+            float matched_yaw = 0.000f;
+            float matched_pitch = 0.000f;
+            float matched_roll = 0.000f;
             bool find_matched = false;
 
             {   //别动这个{}锁，保护整个对齐过程的，确保姿态数据不被串口线程修改[cite: 3]
@@ -157,19 +155,17 @@ int main() {
 
             if (!find_matched) continue;
 
-            // --- 修改：在绘制激光点时，使用对齐后的 matched_yaw/pitch ---
-            // 这样绘制出的激光点能反映图像拍摄时刻激光相对于画面的真实位置[cite: 3, 5]
-            drawer.draw_laser_dot(local_frame, math_solver.camera_matrix, math_solver.cam_offset, math_solver.ray_offset, distance_d);
-
             vector<DetectResult> results = pikachu_ai.run_yolo(local_frame);
 
             for (auto &obj : results) {
                 // 修改说明：解算时必须使用图像采集时的姿态 matched_yaw/pitch。
                 // 如果使用此时最新的串口角度，由于处理耗时（约 30-50ms），云台可能已移动，导致解算脱靶[cite: 3, 5]
                 GimbalCmd cmd = math_solver.solve(results[0], matched_yaw, matched_pitch, matched_roll);
-                distance_d = cmd.p_world_x;
 
                 drawer.draw_results(local_frame, obj, cmd, matched_yaw, matched_pitch, matched_roll);
+                drawer.draw_laser_dot(local_frame, math_solver.camera_matrix, math_solver.cam_offset,
+                                      math_solver.ray_offset, math_solver.R_cam_to_ray,
+                                      cmd.pnp_tx, cmd.pnp_ty, cmd.pnp_tz);
 
                 SendPacket pkt;
                 pkt.mode = 1;
