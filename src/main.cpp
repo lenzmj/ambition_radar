@@ -12,6 +12,7 @@
 #include "SerialDriver.h"
 #include "yaml.hpp"
 #include "draw.h"
+#include "rpy_cam_to_ray.h"
 
 using namespace std;
 using namespace cv;
@@ -113,6 +114,10 @@ int main() {
 
     Mat local_frame;
     uint64_t local_timestamp; // 修改：本循环处理的图像时间戳
+    Mat last_calib_frame;
+    bool have_calib_snap = false;
+    float calib_pnp_tx = 0.f, calib_pnp_ty = 0.f, calib_pnp_tz = 0.f;
+
     namedWindow("Pikachu View", WINDOW_NORMAL);
     resizeWindow("Pikachu View", 800, 600);
 
@@ -160,6 +165,7 @@ int main() {
             // 单目标：每帧至多跟踪一个；多检测时取 score 最高（与 Detector 当前策略一致，可防以后多输出）
             if (results.empty()) {
                 math_solver.reset_filter();
+                have_calib_snap = false;
                 SendPacket pkt;
                 pkt.mode = 0;
                 pkt.pitch = 0;
@@ -182,6 +188,12 @@ int main() {
                                       math_solver.cam_offset, math_solver.ray_offset, math_solver.R_cam_to_ray,
                                       cmd.pnp_tx, cmd.pnp_ty, cmd.pnp_tz);
 
+                local_frame.copyTo(last_calib_frame);
+                calib_pnp_tx = cmd.pnp_tx;
+                calib_pnp_ty = cmd.pnp_ty;
+                calib_pnp_tz = cmd.pnp_tz;
+                have_calib_snap = true;
+
                 SendPacket pkt;
                 pkt.mode = 1;
                 pkt.pitch = cmd.target_pitch;
@@ -195,9 +207,27 @@ int main() {
             imshow("Pikachu View", local_frame);
         }
 
-        if ((waitKey(1) & 0xFF) == 27) { 
+        int key = waitKey(1) & 0xFF;
+        if (key == 27) {
             is_running = false;
             break;
+        }
+        if (key == 'w' || key == 'W') {
+            if (!have_calib_snap || calib_pnp_tz <= 1e-4f) {
+                std::cerr << "[rpy_calib] 无有效帧：请先稳定跟踪目标（出 LASER_REF）后再按 W。\n";
+            } else {
+                RpyCamToRayInput cinp;
+                last_calib_frame.copyTo(cinp.frame_bgr);
+                cinp.camera_matrix = math_solver.camera_matrix.clone();
+                cinp.dist_coeffs = math_solver.dist_coeffs.clone();
+                cinp.cam_offset = math_solver.cam_offset;
+                cinp.ray_offset = math_solver.ray_offset;
+                cinp.R_cam_to_ray = math_solver.R_cam_to_ray;
+                cinp.pnp_tx = calib_pnp_tx;
+                cinp.pnp_ty = calib_pnp_ty;
+                cinp.pnp_tz = calib_pnp_tz;
+                run_rpy_calib_two_clicks(cinp);
+            }
         }
     }
 

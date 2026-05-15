@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.10)
+cmake_minimum_required(VERSION 3.12)
 project(HikPikachu)
 
 set(CMAKE_CXX_STANDARD 17)
@@ -15,7 +15,7 @@ find_package(yaml-cpp REQUIRED)
 set(MVS_INCLUDE_DIR /opt/MVS/include)
 set(MVS_LIBRARY_DIR /opt/MVS/lib/64)
 
-file(GLOB AMB_SOURCES "src/*.cpp")
+file(GLOB AMB_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
 
 set(AMBITION_TRT_READY FALSE)
 if(AMBITION_ENABLE_TRT)

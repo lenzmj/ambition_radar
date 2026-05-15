@@ -56,7 +56,7 @@ EQUALS = =
 CMAKE_SOURCE_DIR = /home/lenzmj/ws/ambition_radar
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/lenzmj/ws/ambition_radar/build
+CMAKE_BINARY_DIR = /home/lenzmj/ws/ambition_radar
 
 # Include any dependencies generated for this target.
 include CMakeFiles/app.dir/depend.make
@@ -73,9 +73,9 @@ CMakeFiles/app.dir/codegen:
 .PHONY : CMakeFiles/app.dir/codegen
 
 CMakeFiles/app.dir/src/HikDriver.cpp.o: CMakeFiles/app.dir/flags.make
-CMakeFiles/app.dir/src/HikDriver.cpp.o: /home/lenzmj/ws/ambition_radar/src/HikDriver.cpp
+CMakeFiles/app.dir/src/HikDriver.cpp.o: src/HikDriver.cpp
 CMakeFiles/app.dir/src/HikDriver.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/app.dir/src/HikDriver.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/app.dir/src/HikDriver.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/HikDriver.cpp.o -MF CMakeFiles/app.dir/src/HikDriver.cpp.o.d -o CMakeFiles/app.dir/src/HikDriver.cpp.o -c /home/lenzmj/ws/ambition_radar/src/HikDriver.cpp
 
 CMakeFiles/app.dir/src/HikDriver.cpp.i: cmake_force
@@ -87,9 +87,9 @@ CMakeFiles/app.dir/src/HikDriver.cpp.s: cmake_force
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/HikDriver.cpp -o CMakeFiles/app.dir/src/HikDriver.cpp.s
 
 CMakeFiles/app.dir/src/SerialDriver.cpp.o: CMakeFiles/app.dir/flags.make
-CMakeFiles/app.dir/src/SerialDriver.cpp.o: /home/lenzmj/ws/ambition_radar/src/SerialDriver.cpp
+CMakeFiles/app.dir/src/SerialDriver.cpp.o: src/SerialDriver.cpp
 CMakeFiles/app.dir/src/SerialDriver.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/app.dir/src/SerialDriver.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/app.dir/src/SerialDriver.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/SerialDriver.cpp.o -MF CMakeFiles/app.dir/src/SerialDriver.cpp.o.d -o CMakeFiles/app.dir/src/SerialDriver.cpp.o -c /home/lenzmj/ws/ambition_radar/src/SerialDriver.cpp
 
 CMakeFiles/app.dir/src/SerialDriver.cpp.i: cmake_force
@@ -101,9 +101,9 @@ CMakeFiles/app.dir/src/SerialDriver.cpp.s: cmake_force
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/SerialDriver.cpp -o CMakeFiles/app.dir/src/SerialDriver.cpp.s
 
 CMakeFiles/app.dir/src/crc.cpp.o: CMakeFiles/app.dir/flags.make
-CMakeFiles/app.dir/src/crc.cpp.o: /home/lenzmj/ws/ambition_radar/src/crc.cpp
+CMakeFiles/app.dir/src/crc.cpp.o: src/crc.cpp
 CMakeFiles/app.dir/src/crc.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/app.dir/src/crc.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/app.dir/src/crc.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/crc.cpp.o -MF CMakeFiles/app.dir/src/crc.cpp.o.d -o CMakeFiles/app.dir/src/crc.cpp.o -c /home/lenzmj/ws/ambition_radar/src/crc.cpp
 
 CMakeFiles/app.dir/src/crc.cpp.i: cmake_force
@@ -115,9 +115,9 @@ CMakeFiles/app.dir/src/crc.cpp.s: cmake_force
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/crc.cpp -o CMakeFiles/app.dir/src/crc.cpp.s
 
 CMakeFiles/app.dir/src/detector.cpp.o: CMakeFiles/app.dir/flags.make
-CMakeFiles/app.dir/src/detector.cpp.o: /home/lenzmj/ws/ambition_radar/src/detector.cpp
+CMakeFiles/app.dir/src/detector.cpp.o: src/detector.cpp
 CMakeFiles/app.dir/src/detector.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/app.dir/src/detector.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/app.dir/src/detector.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/detector.cpp.o -MF CMakeFiles/app.dir/src/detector.cpp.o.d -o CMakeFiles/app.dir/src/detector.cpp.o -c /home/lenzmj/ws/ambition_radar/src/detector.cpp
 
 CMakeFiles/app.dir/src/detector.cpp.i: cmake_force
@@ -129,9 +129,9 @@ CMakeFiles/app.dir/src/detector.cpp.s: cmake_force
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/detector.cpp -o CMakeFiles/app.dir/src/detector.cpp.s
 
 CMakeFiles/app.dir/src/draw.cpp.o: CMakeFiles/app.dir/flags.make
-CMakeFiles/app.dir/src/draw.cpp.o: /home/lenzmj/ws/ambition_radar/src/draw.cpp
+CMakeFiles/app.dir/src/draw.cpp.o: src/draw.cpp
 CMakeFiles/app.dir/src/draw.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/app.dir/src/draw.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/app.dir/src/draw.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/draw.cpp.o -MF CMakeFiles/app.dir/src/draw.cpp.o.d -o CMakeFiles/app.dir/src/draw.cpp.o -c /home/lenzmj/ws/ambition_radar/src/draw.cpp
 
 CMakeFiles/app.dir/src/draw.cpp.i: cmake_force
@@ -143,9 +143,9 @@ CMakeFiles/app.dir/src/draw.cpp.s: cmake_force
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/draw.cpp -o CMakeFiles/app.dir/src/draw.cpp.s
 
 CMakeFiles/app.dir/src/extended_kalman_filter.cpp.o: CMakeFiles/app.dir/flags.make
-CMakeFiles/app.dir/src/extended_kalman_filter.cpp.o: /home/lenzmj/ws/ambition_radar/src/extended_kalman_filter.cpp
+CMakeFiles/app.dir/src/extended_kalman_filter.cpp.o: src/extended_kalman_filter.cpp
 CMakeFiles/app.dir/src/extended_kalman_filter.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/app.dir/src/extended_kalman_filter.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/app.dir/src/extended_kalman_filter.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/extended_kalman_filter.cpp.o -MF CMakeFiles/app.dir/src/extended_kalman_filter.cpp.o.d -o CMakeFiles/app.dir/src/extended_kalman_filter.cpp.o -c /home/lenzmj/ws/ambition_radar/src/extended_kalman_filter.cpp
 
 CMakeFiles/app.dir/src/extended_kalman_filter.cpp.i: cmake_force
@@ -157,9 +157,9 @@ CMakeFiles/app.dir/src/extended_kalman_filter.cpp.s: cmake_force
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/extended_kalman_filter.cpp -o CMakeFiles/app.dir/src/extended_kalman_filter.cpp.s
 
 CMakeFiles/app.dir/src/main.cpp.o: CMakeFiles/app.dir/flags.make
-CMakeFiles/app.dir/src/main.cpp.o: /home/lenzmj/ws/ambition_radar/src/main.cpp
+CMakeFiles/app.dir/src/main.cpp.o: src/main.cpp
 CMakeFiles/app.dir/src/main.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/app.dir/src/main.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/app.dir/src/main.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/main.cpp.o -MF CMakeFiles/app.dir/src/main.cpp.o.d -o CMakeFiles/app.dir/src/main.cpp.o -c /home/lenzmj/ws/ambition_radar/src/main.cpp
 
 CMakeFiles/app.dir/src/main.cpp.i: cmake_force
@@ -171,9 +171,9 @@ CMakeFiles/app.dir/src/main.cpp.s: cmake_force
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/main.cpp -o CMakeFiles/app.dir/src/main.cpp.s
 
 CMakeFiles/app.dir/src/rpy_cam_to_ray.cpp.o: CMakeFiles/app.dir/flags.make
-CMakeFiles/app.dir/src/rpy_cam_to_ray.cpp.o: /home/lenzmj/ws/ambition_radar/src/rpy_cam_to_ray.cpp
+CMakeFiles/app.dir/src/rpy_cam_to_ray.cpp.o: src/rpy_cam_to_ray.cpp
 CMakeFiles/app.dir/src/rpy_cam_to_ray.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/app.dir/src/rpy_cam_to_ray.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/app.dir/src/rpy_cam_to_ray.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/rpy_cam_to_ray.cpp.o -MF CMakeFiles/app.dir/src/rpy_cam_to_ray.cpp.o.d -o CMakeFiles/app.dir/src/rpy_cam_to_ray.cpp.o -c /home/lenzmj/ws/ambition_radar/src/rpy_cam_to_ray.cpp
 
 CMakeFiles/app.dir/src/rpy_cam_to_ray.cpp.i: cmake_force
@@ -185,9 +185,9 @@ CMakeFiles/app.dir/src/rpy_cam_to_ray.cpp.s: cmake_force
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/rpy_cam_to_ray.cpp -o CMakeFiles/app.dir/src/rpy_cam_to_ray.cpp.s
 
 CMakeFiles/app.dir/src/solver.cpp.o: CMakeFiles/app.dir/flags.make
-CMakeFiles/app.dir/src/solver.cpp.o: /home/lenzmj/ws/ambition_radar/src/solver.cpp
+CMakeFiles/app.dir/src/solver.cpp.o: src/solver.cpp
 CMakeFiles/app.dir/src/solver.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/app.dir/src/solver.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/app.dir/src/solver.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/solver.cpp.o -MF CMakeFiles/app.dir/src/solver.cpp.o.d -o CMakeFiles/app.dir/src/solver.cpp.o -c /home/lenzmj/ws/ambition_radar/src/solver.cpp
 
 CMakeFiles/app.dir/src/solver.cpp.i: cmake_force
@@ -199,9 +199,9 @@ CMakeFiles/app.dir/src/solver.cpp.s: cmake_force
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/solver.cpp -o CMakeFiles/app.dir/src/solver.cpp.s
 
 CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o: CMakeFiles/app.dir/flags.make
-CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o: /home/lenzmj/ws/ambition_radar/src/yolo_backend_openvino.cpp
+CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o: src/yolo_backend_openvino.cpp
 CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o -MF CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o.d -o CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.o -c /home/lenzmj/ws/ambition_radar/src/yolo_backend_openvino.cpp
 
 CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.i: cmake_force
@@ -213,9 +213,9 @@ CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.s: cmake_force
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/yolo_backend_openvino.cpp -o CMakeFiles/app.dir/src/yolo_backend_openvino.cpp.s
 
 CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o: CMakeFiles/app.dir/flags.make
-CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o: /home/lenzmj/ws/ambition_radar/src/yolo_backend_tensorrt.cpp
+CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o: src/yolo_backend_tensorrt.cpp
 CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o -MF CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o.d -o CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.o -c /home/lenzmj/ws/ambition_radar/src/yolo_backend_tensorrt.cpp
 
 CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.i: cmake_force
@@ -227,9 +227,9 @@ CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.s: cmake_force
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/lenzmj/ws/ambition_radar/src/yolo_backend_tensorrt.cpp -o CMakeFiles/app.dir/src/yolo_backend_tensorrt.cpp.s
 
 CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o: CMakeFiles/app.dir/flags.make
-CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o: /home/lenzmj/ws/ambition_radar/src/yolo_infer_backend.cpp
+CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o: src/yolo_infer_backend.cpp
 CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o: CMakeFiles/app.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o"
 	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o -MF CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o.d -o CMakeFiles/app.dir/src/yolo_infer_backend.cpp.o -c /home/lenzmj/ws/ambition_radar/src/yolo_infer_backend.cpp
 
 CMakeFiles/app.dir/src/yolo_infer_backend.cpp.i: cmake_force
@@ -292,7 +292,7 @@ app: /usr/local/lib/libopencv_imgproc.so.4.6.0
 app: /usr/local/lib/libopencv_core.so.4.6.0
 app: /usr/lib/x86_64-linux-gnu/librt.a
 app: CMakeFiles/app.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/lenzmj/ws/ambition_radar/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Linking CXX executable app"
+	@$(CMAKE_COMMAND) -E cmake_echo_color "--switch=$(COLOR)" --green --bold --progress-dir=/home/lenzmj/ws/ambition_radar/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Linking CXX executable app"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/app.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -304,6 +304,6 @@ CMakeFiles/app.dir/clean:
 .PHONY : CMakeFiles/app.dir/clean
 
 CMakeFiles/app.dir/depend:
-	cd /home/lenzmj/ws/ambition_radar/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/lenzmj/ws/ambition_radar /home/lenzmj/ws/ambition_radar /home/lenzmj/ws/ambition_radar/build /home/lenzmj/ws/ambition_radar/build /home/lenzmj/ws/ambition_radar/build/CMakeFiles/app.dir/DependInfo.cmake "--color=$(COLOR)"
+	cd /home/lenzmj/ws/ambition_radar && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/lenzmj/ws/ambition_radar /home/lenzmj/ws/ambition_radar /home/lenzmj/ws/ambition_radar /home/lenzmj/ws/ambition_radar /home/lenzmj/ws/ambition_radar/CMakeFiles/app.dir/DependInfo.cmake "--color=$(COLOR)"
 .PHONY : CMakeFiles/app.dir/depend
 

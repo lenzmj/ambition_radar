@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"/home/lenzmj/ws/ambition_radar/cmake_install.cmake"
+	],
+	"Parallel" : false
+}
