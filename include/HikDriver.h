@@ -3,19 +3,20 @@
 
 #include <opencv2/opencv.hpp>
 #include "MvCameraControl.h"
-#include <chrono> // 修改：引入 chrono 库以支持高精度系统时间
+#include <chrono>
+#include <string> // 修改：引入 string 类用于序列号处理
 
 class HikDriver {
 public:
     HikDriver();
     ~HikDriver();
 
-    bool connect();
+    // 修改：增加 target_sn 参数，用于指定要连接的相机序列号
+    bool connect(const std::string& target_sn);
 
-    /** 曝光时间 (µs)、增益 (dB)。值为负数表示不修改该项（保持相机当前/自动模式）。 */
+    /** 曝光时间 (µs)、增益 (dB)。值为负数表示不修改该项。 */
     void set_isp_from_config(double exposure_time_us, double gain_db);
     
-    // 修改：增加 uint64_t& timestamp 参数，用于回传图像到达内存的确切时间戳
     bool get_frame(cv::Mat& output_img, uint64_t& timestamp);
     
     void close_camera();

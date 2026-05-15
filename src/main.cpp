@@ -34,7 +34,7 @@ atomic<bool> is_running(true);
 atomic<bool> has_new_frame(false); 
 
 // --- 取图线程 ---
-void capture_task(HikDriver* cam) {
+void capture_task(HikDriver* cam,const string& target_sn) {
     Mat tmp_frame;
     uint64_t tmp_ts; // 修改：临时存储图像时间戳
     auto last_success_time = std::chrono::steady_clock::now();
@@ -56,7 +56,7 @@ void capture_task(HikDriver* cam) {
             if (std::chrono::duration_cast<std::chrono::seconds>(now - last_success_time).count() > 1) {
                 cam->close_camera();
                 std::this_thread::sleep_for(std::chrono::milliseconds(500));
-                cam->connect(); 
+                cam->connect(target_sn);
                 last_success_time = now; 
             }
         }
@@ -95,11 +95,11 @@ int main() {
     auto& cfg = ConfigManager::getInstance();
 
     HikDriver camera;
+    string target_sn = cfg.get<string>("camera.camera_sn", "DA4568803");
     camera.set_isp_from_config(
         cfg.get<double>("camera.exposure_time_us", -1.0),
         cfg.get<double>("camera.gain", -1.0));
-    if (!camera.connect()) return -1;
-
+    if (!camera.connect(target_sn)) return -1;
     string port = cfg.get<string>("hardware.serial_port", "");
     SerialDriver serial(port.c_str());
 
@@ -109,7 +109,7 @@ int main() {
     Visualizer drawer;
 
     thread t_serial(serial_task, &serial);
-    thread t_capture(capture_task, &camera);
+    thread t_capture(capture_task, &camera,target_sn);
 
     Mat local_frame;
     uint64_t local_timestamp; // 修改：本循环处理的图像时间戳
@@ -160,9 +160,9 @@ int main() {
             for (auto &obj : results) {
                 // 修改说明：解算时必须使用图像采集时的姿态 matched_yaw/pitch。
                 // 如果使用此时最新的串口角度，由于处理耗时（约 30-50ms），云台可能已移动，导致解算脱靶[cite: 3, 5]
-                GimbalCmd cmd = math_solver.solve(results[0], matched_yaw, matched_pitch, matched_roll);
+                GimbalCmd cmd = math_solver.solve(obj, matched_yaw, matched_pitch, matched_roll);
 
-                drawer.draw_results(local_frame, obj, cmd, matched_yaw, matched_pitch, matched_roll);
+                drawer.draw_results(local_frame, math_solver.camera_matrix, obj, cmd, matched_yaw, matched_pitch, matched_roll);
                 drawer.draw_laser_dot(local_frame, math_solver.camera_matrix, math_solver.cam_offset,
                                       math_solver.ray_offset, math_solver.R_cam_to_ray,
                                       cmd.pnp_tx, cmd.pnp_ty, cmd.pnp_tz);

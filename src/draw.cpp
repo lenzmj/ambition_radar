@@ -28,7 +28,8 @@ void Visualizer::draw_display_fps(Mat& frame)
     putText(frame, label, org, FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 255, 0), 2);
 }
 
-void Visualizer::draw_results(Mat &frame, const DetectResult &obj, const GimbalCmd &cmd, float real_yaw, float real_pitch, float real_roll)
+void Visualizer::draw_results(Mat &frame, const Mat &cam_matrix, const DetectResult &obj, const GimbalCmd &cmd,
+                              float real_yaw, float real_pitch, float real_roll)
 {
     Scalar draw_color = cmd.is_locked ? locked_color : Scalar(255, 255, 255);
     Mat local_frame = frame; 
@@ -44,8 +45,18 @@ void Visualizer::draw_results(Mat &frame, const DetectResult &obj, const GimbalC
         putText(local_frame, to_string(j), obj.corners[j], FONT_HERSHEY_SIMPLEX, 0.6, Scalar(255, 255, 0), 2);
     }
 
-    // 绘制中心点
-    circle(local_frame, Point(obj.box.x + obj.box.width / 2, obj.box.y + obj.box.height / 2), 3, Scalar(0, 0, 255), -1);
+    // 检测框几何中心（与 PnP 解算中心可能略有偏差）
+    circle(local_frame, Point(obj.box.x + obj.box.width / 2, obj.box.y + obj.box.height / 2), 2, Scalar(0, 255, 255), -1);
+    // PnP 模型原点（与 Solver / LASER_REF 共用 tvec），作为「对准」判定的红色基准点
+    if (cmd.pnp_tz > 1e-4f && !cam_matrix.empty()) {
+        double fx = cam_matrix.at<double>(0, 0);
+        double fy = cam_matrix.at<double>(1, 1);
+        double cx = cam_matrix.at<double>(0, 2);
+        double cy = cam_matrix.at<double>(1, 2);
+        float u0 = static_cast<float>(fx * (cmd.pnp_tx / cmd.pnp_tz) + cx);
+        float v0 = static_cast<float>(fy * (cmd.pnp_ty / cmd.pnp_tz) + cy);
+        circle(local_frame, Point(cvRound(u0), cvRound(v0)), 2, Scalar(0, 0, 255), -1);
+    }
 
     // 文本显示
     string l1 = "UAV";

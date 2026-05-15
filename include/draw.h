@@ -12,8 +12,9 @@ class Visualizer {
 public:
     Visualizer();
 
-    // 绘制识别结果和解算信息
-    void draw_results(cv::Mat& frame, const DetectResult& obj, const GimbalCmd& cmd, float real_yaw, float real_pitch, float real_roll);
+    // 绘制识别结果和解算信息（cam_matrix 用于将 PnP 目标中心投影到像素，与 LASER_REF 同一几何基准）
+    void draw_results(cv::Mat& frame, const cv::Mat& cam_matrix, const DetectResult& obj, const GimbalCmd& cmd,
+                      float real_yaw, float real_pitch, float real_roll);
 
     /**
      * @brief 绘制激光理论击打点（与 Solver 一致：激光系 +X 为发射轴，rpy_cam_to_ray 定义 R_cam_to_ray）

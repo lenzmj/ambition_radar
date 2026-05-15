@@ -16,13 +16,41 @@ HikDriver::~HikDriver() {
     close_camera();
 }
 
-bool HikDriver::connect() {
+// 修改：实现基于序列号匹配的连接逻辑
+bool HikDriver::connect(const std::string& target_sn) {
     int res = MV_OK;
     MV_CC_DEVICE_INFO_LIST device_list;
     res = MV_CC_EnumDevices(MV_USB_DEVICE | MV_GIGE_DEVICE, &device_list);
     if (device_list.nDeviceNum == 0) return false;
 
-    res = MV_CC_CreateHandle(&handle, device_list.pDeviceInfo[0]);
+    // 修改：遍历所有检测到的设备
+    int target_index = -1;
+    for (unsigned int i = 0; i < device_list.nDeviceNum; i++) {
+        MV_CC_DEVICE_INFO* pDeviceInfo = device_list.pDeviceInfo[i];
+        std::string current_sn = "";
+
+        // 修改：根据相机传输层类型（USB或网口）提取序列号
+        if (pDeviceInfo->nTLayerType == MV_USB_DEVICE) {
+            current_sn = reinterpret_cast<char*>(pDeviceInfo->SpecialInfo.stUsb3VInfo.chSerialNumber);
+        } else if (pDeviceInfo->nTLayerType == MV_GIGE_DEVICE) {
+            current_sn = reinterpret_cast<char*>(pDeviceInfo->SpecialInfo.stGigEInfo.chSerialNumber);
+        }
+
+        // 修改：比对当前相机序列号是否为目标序列号
+        if (current_sn == target_sn) {
+            target_index = i;
+            break;
+        }
+    }
+
+    // 修改：如果遍历结束未发现匹配的序列号，则返回失败
+    if (target_index == -1) {
+        std::cerr << "[HikDriver] 未找到序列号为: " << target_sn << " 的相机" << std::endl;
+        return false;
+    }
+
+    // 修改：使用匹配到的 target_index 创建句柄，不再写死为索引 0
+    res = MV_CC_CreateHandle(&handle, device_list.pDeviceInfo[target_index]);
     if (res != MV_OK) return false;
 
     res = MV_CC_OpenDevice(handle);
@@ -44,20 +72,12 @@ void HikDriver::apply_isp_settings() {
     if (!is_connected || handle == NULL)
         return;
     if (exposure_time_us_ >= 0.0) {
-        int r = MV_CC_SetExposureAutoMode(handle, MV_EXPOSURE_AUTO_MODE_OFF);
-        if (r != MV_OK)
-            std::cerr << "[HikDriver] MV_CC_SetExposureAutoMode failed: " << r << std::endl;
-        r = MV_CC_SetExposureTime(handle, static_cast<float>(exposure_time_us_));
-        if (r != MV_OK)
-            std::cerr << "[HikDriver] MV_CC_SetExposureTime failed: " << r << std::endl;
+        MV_CC_SetExposureAutoMode(handle, MV_EXPOSURE_AUTO_MODE_OFF);
+        MV_CC_SetExposureTime(handle, static_cast<float>(exposure_time_us_));
     }
     if (gain_db_ >= 0.0) {
-        int r = MV_CC_SetGainMode(handle, MV_GAIN_MODE_OFF);
-        if (r != MV_OK)
-            std::cerr << "[HikDriver] MV_CC_SetGainMode failed: " << r << std::endl;
-        r = MV_CC_SetGain(handle, static_cast<float>(gain_db_));
-        if (r != MV_OK)
-            std::cerr << "[HikDriver] MV_CC_SetGain failed: " << r << std::endl;
+        MV_CC_SetGainMode(handle, MV_GAIN_MODE_OFF);
+        MV_CC_SetGain(handle, static_cast<float>(gain_db_));
     }
 }
 
@@ -79,22 +99,14 @@ int HikDriver::convert_to_mat(MV_FRAME_OUT_INFO_EX* info, unsigned char* data, M
     return 0;
 }
 
-// 修改：重写 get_frame 函数，在图像成功获取的时刻记录系统时间[cite: 2]
 bool HikDriver::get_frame(Mat& output_img, uint64_t& timestamp) {
     if (!is_connected) return false;
-
     MV_FRAME_OUT out_frame = {0};
-    // 1000ms超时。这里是图像从相机传输到PC内存的观测点[cite: 2]
     int res = MV_CC_GetImageBuffer(handle, &out_frame, 1000);
-
     if (res == MV_OK) {
         convert_to_mat(&out_frame.stFrameInfo, out_frame.pBufAddr, output_img);
-        
-        // 修改原因：获取 steady_clock 的当前毫秒数作为图像的时间坐标。
-        // 这代表了这帧画面“被看到”的时刻，用于后续匹配云台角度[cite: 3]
         timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
             std::chrono::steady_clock::now().time_since_epoch()).count();
-
         MV_CC_FreeImageBuffer(handle, &out_frame);
         return true;
     }

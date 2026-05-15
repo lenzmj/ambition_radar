@@ -26,12 +26,13 @@ static Eigen::Matrix3f R_gimbal_from_deg(float yaw_deg, float pitch_deg, float r
 
 /**
  * 在 Rz*Ry 两轴可控、Rx(roll) 由测量固定（无 roll 电机）的模型下，
- * 使机体激光轴 d_body 转到与世界单位向量 W 同向（最大化点积）。
- * 用于 rpy_cam_to_ray 非零时，目标角与“弦方向角”分离。
+ * 使激光轴在候选姿态 R(y,p) 下与「该姿态下激光口 → 目标点」方向对齐（最大化点积）。
+ * 必须用 P_world - R*ray_offset：随 yaw/pitch 变化，激光口在世界系中平移，仅用当前姿态的弦向会偏差。
  */
-static void solve_pt_ik_laser_to_world(const Eigen::Vector3f& W_world_unit,
+static void solve_pt_ik_laser_to_world(const Eigen::Vector3f& P_world,
+                                       const Eigen::Vector3f& ray_offset,
                                        const Eigen::Vector3f& d_body_unit,
-                                       float seed_yaw_deg, float seed_pitch_deg,float roll_deg_fixed,
+                                       float seed_yaw_deg, float seed_pitch_deg, float roll_deg_fixed,
                                        float half_deg, float coarse_step_deg,
                                        int fine_passes, float fine_half_deg, float fine_step_deg,
                                        float& out_yaw_deg, float& out_pitch_deg) {
@@ -39,7 +40,13 @@ static void solve_pt_ik_laser_to_world(const Eigen::Vector3f& W_world_unit,
     out_yaw_deg = seed_yaw_deg;
     out_pitch_deg = seed_pitch_deg;
     auto score = [&](float y_deg, float p_deg) -> float {
-        return (R_gimbal_from_deg(y_deg, p_deg, roll_deg_fixed) * d_body_unit).dot(W_world_unit);
+        const Eigen::Matrix3f R = R_gimbal_from_deg(y_deg, p_deg, roll_deg_fixed);
+        const Eigen::Vector3f O = R * ray_offset;
+        const Eigen::Vector3f to_target = P_world - O;
+        const float n = to_target.norm();
+        if (n < 1e-4f) return -2.0f;
+        const Eigen::Vector3f to_unit = to_target * (1.0f / n);
+        return (R * d_body_unit).dot(to_unit);
     };
     for (float dy = -half_deg; dy <= half_deg + 1e-3f; dy += coarse_step_deg)
         for (float dp = -half_deg; dp <= half_deg + 1e-3f; dp += coarse_step_deg) {
@@ -166,8 +173,8 @@ GimbalCmd Solver::solve(DetectResult& target, float curr_yaw, float curr_pitch, 
         const int fine_passes = cfg.get<int>("params.ik_fine_passes", 2);
         const float fine_half = cfg.get<float>("params.ik_fine_half_deg", 3.5f);
         const float fine_step = cfg.get<float>("params.ik_fine_step_deg", 0.15f);
-        solve_pt_ik_laser_to_world(aim_unit, laser_axis_body,
-                                   chord_yaw, chord_pitch,curr_roll,
+        solve_pt_ik_laser_to_world(P_world, ray_offset, laser_axis_body,
+                                   chord_yaw, chord_pitch, curr_roll,
                                    half_deg, coarse_step, fine_passes, fine_half, fine_step,
                                    raw_yaw, raw_pitch);
     }
