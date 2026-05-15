@@ -27,6 +27,8 @@ public:
     void reset_filter(); // 目标长时间消失后重置滤波器
 
     cv::Mat camera_matrix;
+    /** 与 camera_matrix 同源，供 overlay 与 solvePnP 一致的畸变投影 */
+    cv::Mat dist_coeffs;
     Eigen::Vector3f cam_offset;
     Eigen::Vector3f ray_offset;
     /** 相机系 -> 激光器系：v_ray = R_cam_to_ray * v_cam（列向量）。由 offset.rpy_cam_to_ray [deg] 构造。 */
@@ -34,7 +36,6 @@ public:
 
 private:
 
-    cv::Mat dist_coeffs;
     std::vector<cv::Point3f> object_3d_points;  
 
     // --- 滤波相关 ---

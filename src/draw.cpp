@@ -4,6 +4,24 @@
 using namespace cv;
 using namespace std;
 
+namespace {
+
+/** OpenCV 相机系下 3D 点 → 像素 (含畸变)，与 solvePnP / projectPoints 约定一致 */
+bool project_cam_point(const Mat& K, const Mat& dist, double x, double y, double z, float& u, float& v)
+{
+    if (z <= 1e-9) return false;
+    vector<Point3f> obj{ Point3f(0.f, 0.f, 0.f) };
+    Mat rvec = Mat::zeros(3, 1, CV_64FC1);
+    Mat tvec = (Mat_<double>(3, 1) << x, y, z);
+    vector<Point2f> img;
+    projectPoints(obj, rvec, tvec, K, dist, img);
+    u = img[0].x;
+    v = img[0].y;
+    return std::isfinite(u) && std::isfinite(v);
+}
+
+} // namespace
+
 Visualizer::Visualizer()
     : fps_tick_(std::chrono::steady_clock::now()), fps_counter_(0), display_fps_(0.0)
 {
@@ -28,8 +46,8 @@ void Visualizer::draw_display_fps(Mat& frame)
     putText(frame, label, org, FONT_HERSHEY_SIMPLEX, 0.7, Scalar(0, 255, 0), 2);
 }
 
-void Visualizer::draw_results(Mat &frame, const Mat &cam_matrix, const DetectResult &obj, const GimbalCmd &cmd,
-                              float real_yaw, float real_pitch, float real_roll)
+void Visualizer::draw_results(Mat &frame, const Mat &cam_matrix, const Mat &dist_coeffs, const DetectResult &obj,
+                              const GimbalCmd &cmd, float real_yaw, float real_pitch, float real_roll)
 {
     Scalar draw_color = cmd.is_locked ? locked_color : Scalar(255, 255, 255);
     Mat local_frame = frame; 
@@ -49,13 +67,9 @@ void Visualizer::draw_results(Mat &frame, const Mat &cam_matrix, const DetectRes
     circle(local_frame, Point(obj.box.x + obj.box.width / 2, obj.box.y + obj.box.height / 2), 2, Scalar(0, 255, 255), -1);
     // PnP 模型原点（与 Solver / LASER_REF 共用 tvec），作为「对准」判定的红色基准点
     if (cmd.pnp_tz > 1e-4f && !cam_matrix.empty()) {
-        double fx = cam_matrix.at<double>(0, 0);
-        double fy = cam_matrix.at<double>(1, 1);
-        double cx = cam_matrix.at<double>(0, 2);
-        double cy = cam_matrix.at<double>(1, 2);
-        float u0 = static_cast<float>(fx * (cmd.pnp_tx / cmd.pnp_tz) + cx);
-        float v0 = static_cast<float>(fy * (cmd.pnp_ty / cmd.pnp_tz) + cy);
-        circle(local_frame, Point(cvRound(u0), cvRound(v0)), 2, Scalar(0, 0, 255), -1);
+        float u0 = 0.f, v0 = 0.f;
+        if (project_cam_point(cam_matrix, dist_coeffs, cmd.pnp_tx, cmd.pnp_ty, cmd.pnp_tz, u0, v0))
+            circle(local_frame, Point(cvRound(u0), cvRound(v0)), 2, Scalar(0, 0, 255), -1);
     }
 
     // 文本显示
@@ -70,7 +84,7 @@ void Visualizer::draw_results(Mat &frame, const Mat &cam_matrix, const DetectRes
     putText(local_frame, l4, Point(10, 30), FONT_HERSHEY_SIMPLEX, 0.6, draw_color, 1);
 }
 
-void Visualizer::draw_laser_dot(Mat &frame, const Mat &cam_matrix,
+void Visualizer::draw_laser_dot(Mat &frame, const Mat &cam_matrix, const Mat &dist_coeffs,
                                 const Eigen::Vector3f &cam_offset, const Eigen::Vector3f &ray_offset,
                                 const Eigen::Matrix3f &R_cam_to_ray,
                                 float pnp_tx, float pnp_ty, float pnp_tz)
@@ -101,13 +115,9 @@ void Visualizer::draw_laser_dot(Mat &frame, const Mat &cam_matrix,
     Eigen::Vector3f hit_cam = ap_cam + t * dir_cam;
     if (hit_cam.z() <= 1e-4f) return;
 
-    double fx = cam_matrix.at<double>(0, 0);
-    double fy = cam_matrix.at<double>(1, 1);
-    double cx = cam_matrix.at<double>(0, 2);
-    double cy = cam_matrix.at<double>(1, 2);
-
-    float u = (float)(fx * (hit_cam.x() / hit_cam.z()) + cx);
-    float v = (float)(fy * (hit_cam.y() / hit_cam.z()) + cy);
+    float u = 0.f, v = 0.f;
+    if (!project_cam_point(cam_matrix, dist_coeffs, hit_cam.x(), hit_cam.y(), hit_cam.z(), u, v))
+        return;
 
     line(frame, Point(u - 15, v), Point(u + 15, v), Scalar(0, 0, 255), 1);
     line(frame, Point(u, v - 15), Point(u, v + 15), Scalar(0, 0, 255), 1);

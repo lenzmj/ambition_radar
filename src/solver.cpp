@@ -223,3 +223,9 @@ GimbalCmd Solver::solve(DetectResult& target, float curr_yaw, float curr_pitch, 
     }
     return cmd;
 }
+
+void Solver::reset_filter() {
+    is_first_run = true;
+    last_yaw = 0.0f;
+    last_pitch = 0.0f;
+}

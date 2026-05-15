@@ -69,7 +69,7 @@ void serial_task(SerialDriver* serial) {
     ReceivePacket rec;
     while (is_running) {
         if (serial->receive_packet(rec)) {
-            // 修改原因：下位机不带时间戳，我们在接收成功的瞬间手动“补打”系统时间。
+            // 下位机不带时间戳，我们在接收成功的瞬间手动“补打”系统时间。
             // 这样姿态数据就有了与图像数据相同的参考坐标系[cite: 3, 4]
             GimbalPose current_pose;
             current_pose.yaw = rec.current_yaw;
@@ -81,8 +81,8 @@ void serial_task(SerialDriver* serial) {
             lock_guard<mutex> lock(pose_mtx);
             pose_buffer.push_back(current_pose);
             
-            // 修改原因：限制队列长度。500 帧左右（约1秒数据）足以覆盖视觉链路延迟[cite: 3]
-            if (pose_buffer.size() > 500) {
+            // 限制队列长度。500 帧左右（约1秒数据）足以覆盖视觉链路延迟[cite: 3]
+            if (pose_buffer.size() > 400) {
                 pose_buffer.pop_front();
             }
         }
@@ -157,14 +157,29 @@ int main() {
 
             vector<DetectResult> results = pikachu_ai.run_yolo(local_frame);
 
-            for (auto &obj : results) {
-                // 修改说明：解算时必须使用图像采集时的姿态 matched_yaw/pitch。
-                // 如果使用此时最新的串口角度，由于处理耗时（约 30-50ms），云台可能已移动，导致解算脱靶[cite: 3, 5]
-                GimbalCmd cmd = math_solver.solve(obj, matched_yaw, matched_pitch, matched_roll);
+            // 单目标：每帧至多跟踪一个；多检测时取 score 最高（与 Detector 当前策略一致，可防以后多输出）
+            if (results.empty()) {
+                math_solver.reset_filter();
+                SendPacket pkt;
+                pkt.mode = 0;
+                pkt.pitch = 0;
+                pkt.yaw = 0;
+                pkt.distance = -1.0f;
+                //serial.send_packet(pkt);
+            } else {
+                const DetectResult* best = &results[0];
+                for (size_t i = 1; i < results.size(); ++i) {
+                    if (results[i].score > best->score) best = &results[i];
+                }
+                DetectResult track = *best;
 
-                drawer.draw_results(local_frame, math_solver.camera_matrix, obj, cmd, matched_yaw, matched_pitch, matched_roll);
-                drawer.draw_laser_dot(local_frame, math_solver.camera_matrix, math_solver.cam_offset,
-                                      math_solver.ray_offset, math_solver.R_cam_to_ray,
+                // 解算必须使用图像采集时的姿态 matched_yaw/pitch（处理延迟下勿用「最新」串口角）[cite: 3, 5]
+                GimbalCmd cmd = math_solver.solve(track, matched_yaw, matched_pitch, matched_roll);
+
+                drawer.draw_results(local_frame, math_solver.camera_matrix, math_solver.dist_coeffs, track, cmd,
+                                    matched_yaw, matched_pitch, matched_roll);
+                drawer.draw_laser_dot(local_frame, math_solver.camera_matrix, math_solver.dist_coeffs,
+                                      math_solver.cam_offset, math_solver.ray_offset, math_solver.R_cam_to_ray,
                                       cmd.pnp_tx, cmd.pnp_ty, cmd.pnp_tz);
 
                 SendPacket pkt;

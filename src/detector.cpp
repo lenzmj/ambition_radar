@@ -77,6 +77,7 @@ vector<DetectResult> Detector::run_yolo(Mat& frame) {
         }
 
         current.box = boundingRect(current.corners);
+        current.score = max_score;
 
         if (!has_history) {
             last_res = current;
@@ -89,6 +90,7 @@ vector<DetectResult> Detector::run_yolo(Mat& frame) {
                     yaml_alpha * current.corners[j].y + (1 - yaml_alpha) * last_res.corners[j].y;
             }
             last_res.box = current.box;
+            last_res.score = max_score;
         }
         lose_cnt = 0;
         final_results.push_back(last_res);

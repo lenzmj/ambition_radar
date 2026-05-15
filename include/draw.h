@@ -12,8 +12,9 @@ class Visualizer {
 public:
     Visualizer();
 
-    // 绘制识别结果和解算信息（cam_matrix 用于将 PnP 目标中心投影到像素，与 LASER_REF 同一几何基准）
-    void draw_results(cv::Mat& frame, const cv::Mat& cam_matrix, const DetectResult& obj, const GimbalCmd& cmd,
+    // 绘制识别结果和解算信息（cam_matrix + dist_coeffs 与 solvePnP 一致，含畸变投影）
+    void draw_results(cv::Mat& frame, const cv::Mat& cam_matrix, const cv::Mat& dist_coeffs,
+                      const DetectResult& obj, const GimbalCmd& cmd,
                       float real_yaw, float real_pitch, float real_roll);
 
     /**
@@ -24,8 +25,9 @@ public:
      * @param ray_offset 激光口相对于云台轴中心偏移 [x, y, z] (同上)
      * @param R_cam_to_ray v_ray = R_cam_to_ray * v_cam
      * @param pnp_tx, pnp_ty, pnp_tz solvePnP 的 tvec（OpenCV 相机系），激光射线与过该点的 Z=const 平面求交后投影，与 PnP 目标对齐
+     * @param dist_coeffs 与标定/solvePnP 相同，可为空 Mat 表示无畸变
      */
-    void draw_laser_dot(cv::Mat& frame, const cv::Mat& cam_matrix,
+    void draw_laser_dot(cv::Mat& frame, const cv::Mat& cam_matrix, const cv::Mat& dist_coeffs,
                         const Eigen::Vector3f& cam_offset, const Eigen::Vector3f& ray_offset,
                         const Eigen::Matrix3f& R_cam_to_ray,
                         float pnp_tx, float pnp_ty, float pnp_tz);
