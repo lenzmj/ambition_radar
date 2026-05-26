@@ -8,10 +8,10 @@
 
 struct SendPacket {
     uint8_t header = 0xA5; // 帧头
-    uint8_t mode;
-    float pitch;
-    float yaw;
-    float distance;
+    uint8_t mode = 0;
+    float pitch = 0;
+    float yaw = 0;
+    float distance = 0 ;
     uint16_t crc16; 
 };
 

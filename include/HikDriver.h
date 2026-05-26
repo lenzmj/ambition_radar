@@ -17,7 +17,8 @@ public:
     /** 曝光时间 (µs)、增益 (dB)。值为负数表示不修改该项。 */
     void set_isp_from_config(double exposure_time_us, double gain_db);
     
-    bool get_frame(cv::Mat& output_img, uint64_t& timestamp);
+    /** BGR 8UC3（SDK BayerRG8 去马赛克后，与 YOLO 输入一致） */
+    bool get_frame(cv::Mat& rgb, uint64_t& timestamp);
     
     void close_camera();
 
@@ -27,7 +28,6 @@ private:
     bool is_connected;
     double exposure_time_us_;
     double gain_db_;
-    int convert_to_mat(MV_FRAME_OUT_INFO_EX* img_info, unsigned char* data_ptr, cv::Mat& dst_img);
 };
 
 #endif

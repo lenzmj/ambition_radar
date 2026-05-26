@@ -77,8 +77,81 @@ static void solve_pt_ik_laser_to_world(const Eigen::Vector3f& P_world,
     out_yaw_deg = normalize_angle(out_yaw_deg);
 }
 
-Solver::Solver() : is_first_run(true), last_yaw(0), last_pitch(0) {
+void Solver::aim_gimbal_at_world_pos(const Eigen::Vector3f& P_world, float curr_yaw, float curr_pitch,
+                                     float curr_roll, const Eigen::Vector3f& laser_axis_body,
+                                     float& out_yaw, float& out_pitch) const {
     auto& cfg = ConfigManager::getInstance();
+    const Eigen::Matrix3f R_now = R_gimbal_from_deg(curr_yaw, curr_pitch, curr_roll);
+    const Eigen::Vector3f aim_vec = P_world - R_now * ray_offset;
+    const float dist_horiz = sqrtf(aim_vec.x() * aim_vec.x() + aim_vec.y() * aim_vec.y());
+    out_yaw = atan2f(aim_vec.y(), aim_vec.x()) * 180.0f / static_cast<float>(M_PI);
+    out_pitch = -atan2f(aim_vec.z(), dist_horiz) * 180.0f / static_cast<float>(M_PI);
+    if (aim_vec.norm() > 1e-6f) {
+        const float half_deg = cfg.get<float>("params.ik_half_deg", 42.0f);
+        const float coarse_step = cfg.get<float>("params.ik_coarse_step_deg", 2.0f);
+        const int fine_passes = cfg.get<int>("params.ik_fine_passes", 2);
+        const float fine_half = cfg.get<float>("params.ik_fine_half_deg", 3.5f);
+        const float fine_step = cfg.get<float>("params.ik_fine_step_deg", 0.15f);
+        solve_pt_ik_laser_to_world(P_world, ray_offset, laser_axis_body, out_yaw, out_pitch, curr_roll,
+                                   half_deg, coarse_step, fine_passes, fine_half, fine_step, out_yaw,
+                                   out_pitch);
+    }
+}
+
+void Solver::update_position_ekf(const Eigen::Vector3f& P_world_meas, uint64_t frame_timestamp_ms) {
+    double dt_s = ekf_default_dt_s_;
+    if (frame_timestamp_ms > 0 && last_frame_ts_ms_ > 0) {
+        const uint64_t diff_ms = (frame_timestamp_ms > last_frame_ts_ms_)
+                                     ? (frame_timestamp_ms - last_frame_ts_ms_)
+                                     : 0;
+        if (diff_ms >= 1 && diff_ms <= 500) {
+            dt_s = static_cast<double>(diff_ms) * 1e-3;
+        }
+    }
+    if (frame_timestamp_ms > 0) {
+        last_frame_ts_ms_ = frame_timestamp_ms;
+    }
+
+    const Eigen::Vector3d z_meas(P_world_meas.x(), P_world_meas.y(), P_world_meas.z());
+
+    if (!pos_ekf_active_) {
+        Eigen::VectorXd x0(6);
+        x0 << z_meas, 0.0, 0.0, 0.0;
+        Eigen::MatrixXd P0 = Eigen::MatrixXd::Identity(6, 6);
+        P0.block(0, 0, 3, 3) *= ekf_init_P_pos_;
+        P0.block(3, 3, 3, 3) *= ekf_init_P_vel_;
+        pos_ekf_ = std::make_unique<tools::ExtendedKalmanFilter>(x0, P0);
+        pos_ekf_active_ = true;
+        return;
+    }
+
+    Eigen::MatrixXd F = Eigen::MatrixXd::Identity(6, 6);
+    F(0, 3) = dt_s;
+    F(1, 4) = dt_s;
+    F(2, 5) = dt_s;
+
+    Eigen::MatrixXd Q = Eigen::MatrixXd::Zero(6, 6);
+    Q(0, 0) = Q(1, 1) = Q(2, 2) = ekf_Q_pos_;
+    Q(3, 3) = Q(4, 4) = Q(5, 5) = ekf_Q_vel_;
+
+    pos_ekf_->predict(F, Q);
+
+    Eigen::MatrixXd H = Eigen::MatrixXd::Zero(3, 6);
+    H.block(0, 0, 3, 3) = Eigen::Matrix3d::Identity();
+    Eigen::MatrixXd R = Eigen::Matrix3d::Identity() * ekf_R_pos_;
+    pos_ekf_->update(z_meas, H, R);
+}
+
+Solver::Solver() {
+    auto& cfg = ConfigManager::getInstance();
+
+    ekf_predict_horizon_s_ = cfg.get<double>("params.ekf.predict_horizon_s", 0.5);
+    ekf_default_dt_s_ = cfg.get<double>("params.ekf.default_dt_s", 1.0 / 60.0);
+    ekf_Q_pos_ = cfg.get<double>("params.ekf.Q_pos", 0.01);
+    ekf_Q_vel_ = cfg.get<double>("params.ekf.Q_vel", 0.5);
+    ekf_R_pos_ = cfg.get<double>("params.ekf.R_pos", 0.05);
+    ekf_init_P_pos_ = cfg.get<double>("params.ekf.init_P_pos", 1.0);
+    ekf_init_P_vel_ = cfg.get<double>("params.ekf.init_P_vel", 10.0);
 
     double fx = cfg.get<double>("camera.fx", 2571.7);
     double fy = cfg.get<double>("camera.fy", 2571.2);
@@ -117,7 +190,8 @@ Solver::Solver() : is_first_run(true), last_yaw(0), last_pitch(0) {
                        .toRotationMatrix();
 }
 
-GimbalCmd Solver::solve(DetectResult& target, float curr_yaw, float curr_pitch, float curr_roll) {
+GimbalCmd Solver::solve(DetectResult& target, float curr_yaw, float curr_pitch, float curr_roll,
+                        uint64_t frame_timestamp_ms) {
     auto& cfg = ConfigManager::getInstance();
     GimbalCmd cmd{};
     
@@ -157,47 +231,40 @@ GimbalCmd Solver::solve(DetectResult& target, float curr_yaw, float curr_pitch, 
     Eigen::Vector3f laser_axis_body =
         (R_cam_to_ray.transpose() * Eigen::Vector3f::UnitX()).normalized();
     Eigen::Vector3f laser_axis_world = R_gimbal * laser_axis_body;
-    Eigen::Vector3f aim_unit = aim_vec;
-    if (aim_unit.norm() > 1e-6f) aim_unit.normalize();
-
-     // 弦方向在世界系的 yaw/pitch，作 2 轴 IK 的初值（roll 固定为 curr_roll 时与网格最优一致）
-    float chord_yaw = atan2(aim_vec.y(), aim_vec.x()) * 180.0f / static_cast<float>(M_PI);
-    float dist_horiz = sqrtf(aim_vec.x() * aim_vec.x() + aim_vec.y() * aim_vec.y());
-    float chord_pitch = -atan2f(aim_vec.z(), dist_horiz) * 180.0f / static_cast<float>(M_PI);
-
-    float raw_yaw = chord_yaw;
-    float raw_pitch = chord_pitch;
-    if (aim_unit.norm() > 1e-6f) {
-        const float half_deg = cfg.get<float>("params.ik_half_deg", 42.0f);
-        const float coarse_step = cfg.get<float>("params.ik_coarse_step_deg", 2.0f);
-        const int fine_passes = cfg.get<int>("params.ik_fine_passes", 2);
-        const float fine_half = cfg.get<float>("params.ik_fine_half_deg", 3.5f);
-        const float fine_step = cfg.get<float>("params.ik_fine_step_deg", 0.15f);
-        solve_pt_ik_laser_to_world(P_world, ray_offset, laser_axis_body,
-                                   chord_yaw, chord_pitch, curr_roll,
-                                   half_deg, coarse_step, fine_passes, fine_half, fine_step,
-                                   raw_yaw, raw_pitch);
-    }
 
     cmd.pnp_tx = static_cast<float>(tx);
     cmd.pnp_ty = static_cast<float>(ty);
     cmd.pnp_tz = static_cast<float>(tz);
 
-    // 滤波处理
-    float alpha_val = cfg.get<float>("params.solve_alpha", 0.3f);
-    if (is_first_run) {
-        last_yaw = raw_yaw; last_pitch = raw_pitch; is_first_run = false;
-    } else {
-        last_yaw = last_yaw + alpha_val * normalize_angle(raw_yaw - last_yaw);
-        last_pitch = last_pitch + alpha_val * (raw_pitch - last_pitch);
-    }
+    // 世界系 xyz 卡尔曼平滑 + 按速度外推 predict_horizon_s 后解算云台角
+    update_position_ekf(P_world, frame_timestamp_ms);
 
-    cmd.target_yaw = last_yaw;
-    cmd.target_pitch = last_pitch;
-    
-    cmd.p_world_x = P_world.x(); // 深度 (前向)
-    cmd.p_world_y = P_world.y(); // 横向 (左向)
-    cmd.p_world_z = P_world.z(); // 纵向 (上向)
+    const Eigen::Vector3f P_smooth(static_cast<float>(pos_ekf_->x[0]),
+                                   static_cast<float>(pos_ekf_->x[1]),
+                                   static_cast<float>(pos_ekf_->x[2]));
+    const float horizon = static_cast<float>(ekf_predict_horizon_s_);
+    const Eigen::Vector3f P_pred(
+        static_cast<float>(pos_ekf_->x[0] + pos_ekf_->x[3] * horizon),
+        static_cast<float>(pos_ekf_->x[1] + pos_ekf_->x[4] * horizon),
+        static_cast<float>(pos_ekf_->x[2] + pos_ekf_->x[5] * horizon));
+
+    float pred_yaw = 0.0f;
+    float pred_pitch = 0.0f;
+    aim_gimbal_at_world_pos(P_pred, curr_yaw, curr_pitch, curr_roll, laser_axis_body, pred_yaw,
+                            pred_pitch);
+
+    cmd.target_yaw = pred_yaw;
+    cmd.target_pitch = pred_pitch;
+
+    cmd.p_world_x = P_smooth.x();
+    cmd.p_world_y = P_smooth.y();
+    cmd.p_world_z = P_smooth.z();
+
+    const Eigen::Vector3f aim_vec_pred = P_pred - P_laser_origin;
+    Eigen::Vector3f aim_unit_pred = aim_vec_pred;
+    if (aim_unit_pred.norm() > 1e-6f) {
+        aim_unit_pred.normalize();
+    }
     // --- 修改部分：根据角度偏差决定是否“锁定” ---
     // 1. 获取 YAML 里的锁定阈值（例如 0.5 度）
     float lock_threshold = cfg.get<float>("params.lock_range", 0.3f);
@@ -213,7 +280,7 @@ GimbalCmd Solver::solve(DetectResult& target, float curr_yaw, float curr_pitch, 
     bool beam_ok = true;
     if (lock_beam_deg >= 0.0f) {
         const float thr = std::cos(lock_beam_deg * static_cast<float>(M_PI) / 180.0f);
-        beam_ok = (aim_unit.dot(laser_axis_world) >= thr);
+        beam_ok = (aim_unit_pred.dot(laser_axis_world) >= thr);
     }
 
     if (yaw_error < lock_threshold && pitch_error < lock_threshold && beam_ok) {
@@ -225,7 +292,7 @@ GimbalCmd Solver::solve(DetectResult& target, float curr_yaw, float curr_pitch, 
 }
 
 void Solver::reset_filter() {
-    is_first_run = true;
-    last_yaw = 0.0f;
-    last_pitch = 0.0f;
+    pos_ekf_.reset();
+    pos_ekf_active_ = false;
+    last_frame_ts_ms_ = 0;
 }

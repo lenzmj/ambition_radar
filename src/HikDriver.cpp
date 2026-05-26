@@ -91,24 +91,27 @@ void HikDriver::close_camera() {
     }
 }
 
-int HikDriver::convert_to_mat(MV_FRAME_OUT_INFO_EX* info, unsigned char* data, Mat& dst) {
-    if (info->enPixelType == PixelType_Gvsp_BayerRG8) {
-        Mat bayer(info->nHeight, info->nWidth, CV_8UC1, data);
-        cvtColor(bayer, dst, COLOR_BayerRG2RGB); 
-    }
-    return 0;
-}
-
-bool HikDriver::get_frame(Mat& output_img, uint64_t& timestamp) {
+bool HikDriver::get_frame(Mat& rgb, uint64_t& timestamp) {
     if (!is_connected) return false;
     MV_FRAME_OUT out_frame = {0};
     int res = MV_CC_GetImageBuffer(handle, &out_frame, 1000);
-    if (res == MV_OK) {
-        convert_to_mat(&out_frame.stFrameInfo, out_frame.pBufAddr, output_img);
-        timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
-            std::chrono::steady_clock::now().time_since_epoch()).count();
-        MV_CC_FreeImageBuffer(handle, &out_frame);
-        return true;
+    if (res != MV_OK)
+        return false;
+
+    MV_FRAME_OUT_INFO_EX* info = &out_frame.stFrameInfo;
+    bool ok = false;
+    if (info->enPixelType == PixelType_Gvsp_BayerRG8) {
+        Mat bayer(info->nHeight, info->nWidth, CV_8UC1, out_frame.pBufAddr);
+        cvtColor(bayer, rgb, COLOR_BayerRG2RGB);
+        ok = !rgb.empty();
+    } else {
+        std::cerr << "[HikDriver] 不支持的像素格式: 0x" << std::hex << info->enPixelType << std::dec
+                  << "（仅实现 BayerRG8）\n";
     }
-    return false;
+
+    timestamp = std::chrono::duration_cast<std::chrono::milliseconds>(
+                    std::chrono::steady_clock::now().time_since_epoch())
+                    .count();
+    MV_CC_FreeImageBuffer(handle, &out_frame);
+    return ok;
 }

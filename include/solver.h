@@ -3,7 +3,9 @@
 
 #include <opencv2/opencv.hpp>
 #include <Eigen/Dense>
+#include <memory>
 #include "detector.h"
+#include "extended_kalman_filter.hpp"
 
 struct GimbalCmd {
     bool is_locked;
@@ -23,7 +25,8 @@ class Solver {
 public:
 
     Solver();
-    GimbalCmd solve(DetectResult& target, float curr_yaw, float curr_pitch, float curr_roll = 0.0f);
+    GimbalCmd solve(DetectResult& target, float curr_yaw, float curr_pitch, float curr_roll,
+                    uint64_t frame_timestamp_ms = 0);
     void reset_filter(); // 目标长时间消失后重置滤波器
 
     cv::Mat camera_matrix;
@@ -35,15 +38,26 @@ public:
     Eigen::Matrix3f R_cam_to_ray;
 
 private:
+    void aim_gimbal_at_world_pos(const Eigen::Vector3f& P_world, float curr_yaw, float curr_pitch,
+                                 float curr_roll, const Eigen::Vector3f& laser_axis_body,
+                                 float& out_yaw, float& out_pitch) const;
 
-    std::vector<cv::Point3f> object_3d_points;  
+    void update_position_ekf(const Eigen::Vector3f& P_world_meas, uint64_t frame_timestamp_ms);
 
-    // --- 滤波相关 ---
-    float last_yaw;
-    float last_pitch;
-    bool is_first_run;
-    const float alpha = 0.27f; // 调节此值：0.1很稳但慢，0.5较抖但快
+    std::vector<cv::Point3f> object_3d_points;
+
+    // 世界系目标位置 [x,y,z,vx,vy,vz] 匀速模型
+    std::unique_ptr<tools::ExtendedKalmanFilter> pos_ekf_;
+    bool pos_ekf_active_ = false;
+    uint64_t last_frame_ts_ms_ = 0;
+
+    double ekf_predict_horizon_s_ = 0.5;
+    double ekf_default_dt_s_ = 1.0 / 60.0;
+    double ekf_Q_pos_ = 0.01;
+    double ekf_Q_vel_ = 0.5;
+    double ekf_R_pos_ = 0.05;
+    double ekf_init_P_pos_ = 1.0;
+    double ekf_init_P_vel_ = 10.0;
 };
 
 #endif
-

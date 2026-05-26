@@ -1,6 +1,7 @@
 #include "rpy_cam_to_ray.h"
 
 #include <Eigen/Geometry>
+#include <algorithm>
 #include <cmath>
 #include <cstdio>
 #include <iostream>
@@ -71,33 +72,139 @@ void matrix_to_rpy_rad(const Eigen::Matrix3f& R, float& roll, float& pitch, floa
 }
 
 struct ClickUi {
-    cv::Mat canvas;
+    cv::Mat base;     // 原图（含底部提示，不含标定点）
+    cv::Mat canvas;   // 当前显示（缩放/平移后）
     cv::Mat K;
     cv::Mat dist;
     Eigen::Vector3f ap_cam;
     float plane_z{};
     Eigen::Matrix3f R_suggested{};
     int phase{}; // 0 等第一次点击，1 等第二次，2 结束
-    cv::Point2f p_sim{};
+    cv::Point2f p_sim{}; // 图像坐标
     cv::Point2f p_act{};
+    float scale{1.f};
+    float offset_x{};
+    float offset_y{};
+    bool panning{};
+    cv::Point2f pan_anchor{};
+    float pan_off_x0{};
+    float pan_off_y0{};
 };
 
-void on_mouse(int event, int x, int y, int, void* userdata) {
+/** WINDOW_NORMAL 下 imshow 会缩放显示，需把窗口坐标映射到 canvas 像素 */
+static cv::Point2f window_to_canvas(int wx, int wy, const ClickUi& st) {
+    const cv::Rect ir = cv::getWindowImageRect("RPY_CAM_TO_RAY");
+    if (ir.width > 0 && ir.height > 0) {
+        return cv::Point2f((wx - ir.x) * st.base.cols / static_cast<float>(ir.width),
+                           (wy - ir.y) * st.base.rows / static_cast<float>(ir.height));
+    }
+    return cv::Point2f(static_cast<float>(wx), static_cast<float>(wy));
+}
+
+static cv::Point2f screen_to_image(const ClickUi& st, int wx, int wy) {
+    const cv::Point2f c = window_to_canvas(wx, wy, st);
+    return cv::Point2f((c.x - st.offset_x) / st.scale, (c.y - st.offset_y) / st.scale);
+}
+
+static cv::Point image_to_screen(const ClickUi& st, const cv::Point2f& p) {
+    return cv::Point((int)std::lround(p.x * st.scale + st.offset_x),
+                     (int)std::lround(p.y * st.scale + st.offset_y));
+}
+
+static void clamp_view(ClickUi& st) {
+    const int w = st.base.cols;
+    const int h = st.base.rows;
+    st.scale = std::clamp(st.scale, 0.25f, 32.f);
+    const float min_ox = static_cast<float>(w) * (1.f - st.scale);
+    const float min_oy = static_cast<float>(h) * (1.f - st.scale);
+    st.offset_x = std::clamp(st.offset_x, min_ox, 0.f);
+    st.offset_y = std::clamp(st.offset_y, min_oy, 0.f);
+}
+
+/** 以图像中心为锚点缩放（不依赖滚轮事件的 x/y，Linux 上常为 0） */
+static void zoom_at_image_center(ClickUi& st, float factor) {
+    st.scale *= factor;
+    const float icx = st.base.cols * 0.5f;
+    const float icy = st.base.rows * 0.5f;
+    st.offset_x = static_cast<float>(st.base.cols) * 0.5f - icx * st.scale;
+    st.offset_y = static_cast<float>(st.base.rows) * 0.5f - icy * st.scale;
+    clamp_view(st);
+}
+
+static void redraw(ClickUi& st) {
+    const cv::Size sz(st.base.cols, st.base.rows);
+    const cv::Mat M =
+        (cv::Mat_<double>(2, 3) << st.scale, 0, st.offset_x, 0, st.scale, st.offset_y);
+    cv::warpAffine(st.base, st.canvas, M, sz, cv::INTER_LINEAR, cv::BORDER_CONSTANT, cv::Scalar(0, 0, 0));
+
+    if (st.phase >= 1) {
+        const cv::Point ps = image_to_screen(st, st.p_sim);
+        cv::circle(st.canvas, ps, 6, cv::Scalar(0, 255, 255), 2);
+        cv::putText(st.canvas, "1 OK", cv::Point(ps.x + 8, ps.y - 8), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                    cv::Scalar(0, 255, 255), 1);
+    }
+    if (st.phase >= 2) {
+        const cv::Point pa = image_to_screen(st, st.p_act);
+        cv::circle(st.canvas, pa, 6, cv::Scalar(0, 0, 255), 2);
+        cv::putText(st.canvas, "2 OK", cv::Point(pa.x + 8, pa.y - 8), cv::FONT_HERSHEY_SIMPLEX, 0.5,
+                    cv::Scalar(0, 0, 255), 1);
+    }
+
+    char zoom_buf[64];
+    std::snprintf(zoom_buf, sizeof(zoom_buf), "zoom %.1fx  wheel: center zoom  R-drag: pan", st.scale);
+    cv::putText(st.canvas, zoom_buf, cv::Point(10, 22), cv::FONT_HERSHEY_SIMPLEX, 0.5, cv::Scalar(180, 220, 255),
+                1);
+    cv::imshow("RPY_CAM_TO_RAY", st.canvas);
+}
+
+void on_mouse(int event, int x, int y, int flags, void* userdata) {
     auto* st = static_cast<ClickUi*>(userdata);
-    if (!st || st->phase >= 2) return;
+    if (!st) return;
+
+    if (event == cv::EVENT_MOUSEWHEEL) {
+        const int delta = cv::getMouseWheelDelta(flags);
+        if (delta == 0) return;
+        const float factor = (delta > 0) ? 1.15f : 1.f / 1.15f;
+        zoom_at_image_center(*st, factor);
+        redraw(*st);
+        return;
+    }
+
+    if (event == cv::EVENT_RBUTTONDOWN) {
+        st->panning = true;
+        st->pan_anchor = window_to_canvas(x, y, *st);
+        st->pan_off_x0 = st->offset_x;
+        st->pan_off_y0 = st->offset_y;
+        return;
+    }
+    if (event == cv::EVENT_RBUTTONUP) {
+        st->panning = false;
+        return;
+    }
+    if (event == cv::EVENT_MOUSEMOVE && st->panning) {
+        const cv::Point2f c = window_to_canvas(x, y, *st);
+        st->offset_x = st->pan_off_x0 + (c.x - st->pan_anchor.x);
+        st->offset_y = st->pan_off_y0 + (c.y - st->pan_anchor.y);
+        clamp_view(*st);
+        redraw(*st);
+        return;
+    }
+
+    if (st->phase >= 2) return;
     if (event != cv::EVENT_LBUTTONDOWN) return;
+
+    const cv::Point2f ip = screen_to_image(*st, x, y);
+    if (ip.x < 0 || ip.y < 0 || ip.x >= st->base.cols || ip.y >= st->base.rows) return;
+
     if (st->phase == 0) {
-        st->p_sim = cv::Point2f((float)x, (float)y);
+        st->p_sim = ip;
         st->phase = 1;
-        cv::circle(st->canvas, cv::Point(x, y), 6, cv::Scalar(0, 255, 255), 2);
-        cv::putText(st->canvas, "1 OK", cv::Point(x + 8, y - 8), cv::FONT_HERSHEY_SIMPLEX, 0.5,
-                     cv::Scalar(0, 255, 255), 1);
-        cv::imshow("RPY_CAM_TO_RAY", st->canvas);
-        std::cout << "[rpy_calib] 已记录模拟点 (" << x << ", " << y << ")，请点击实际击打点。\n";
+        redraw(*st);
+        std::cout << "[rpy_calib] 已记录模拟点 (" << ip.x << ", " << ip.y << ")，请点击实际击打点。\n";
         return;
     }
     if (st->phase == 1) {
-        st->p_act = cv::Point2f((float)x, (float)y);
+        st->p_act = ip;
 
         Eigen::Vector3f hit_cam;
         if (!intersect_ray_plane_z(st->K, st->dist, st->p_act.x, st->p_act.y, st->plane_z, hit_cam)) {
@@ -127,10 +234,7 @@ void on_mouse(int event, int x, int y, int, void* userdata) {
         std::cout << "============================================\n\n";
 
         st->phase = 2;
-        cv::circle(st->canvas, cv::Point(x, y), 6, cv::Scalar(0, 0, 255), 2);
-        cv::putText(st->canvas, "2 OK", cv::Point(x + 8, y - 8), cv::FONT_HERSHEY_SIMPLEX, 0.5,
-                     cv::Scalar(0, 0, 255), 1);
-        cv::imshow("RPY_CAM_TO_RAY", st->canvas);
+        redraw(*st);
     }
 }
 
@@ -143,22 +247,23 @@ void run_rpy_calib_two_clicks(const RpyCamToRayInput& in) {
     }
 
     ClickUi st;
-    in.frame_bgr.copyTo(st.canvas);
+    in.frame_bgr.copyTo(st.base);
+    st.canvas.create(st.base.size(), st.base.type());
     st.K = in.camera_matrix;
     st.dist = in.dist_coeffs.empty() ? cv::Mat() : in.dist_coeffs;
     st.plane_z = in.pnp_tz;
     st.ap_cam = eigen_to_cam(in.ray_offset - in.cam_offset);
     st.phase = 0;
 
-    cv::namedWindow("RPY_CAM_TO_RAY", cv::WINDOW_NORMAL);
+    cv::namedWindow("RPY_CAM_TO_RAY", cv::WINDOW_AUTOSIZE);
     const char* hint =
-        "1: click LASER_REF center  2: click actual hit  ESC: cancel";
-    cv::putText(st.canvas, hint, cv::Point(10, st.canvas.rows - 12), cv::FONT_HERSHEY_SIMPLEX, 0.55,
+        "wheel: center zoom  R-drag: pan  1: LASER_REF  2: hit  ESC: cancel";
+    cv::putText(st.base, hint, cv::Point(10, st.base.rows - 12), cv::FONT_HERSHEY_SIMPLEX, 0.55,
                 cv::Scalar(200, 255, 200), 1);
-    cv::imshow("RPY_CAM_TO_RAY", st.canvas);
+    redraw(st);
     cv::setMouseCallback("RPY_CAM_TO_RAY", on_mouse, &st);
 
-    std::cout << "[rpy_calib] 已打开标定窗口：请先点模拟十字中心，再点实际击打点。ESC 取消。\n";
+    std::cout << "[rpy_calib] 已打开标定窗口：滚轮以图像中心缩放、右键拖动平移；先点模拟十字中心，再点实际击打点。ESC 取消。\n";
 
     for (;;) {
         int k = cv::waitKey(20) & 0xFF;

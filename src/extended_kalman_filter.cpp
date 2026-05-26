@@ -62,9 +62,15 @@ Eigen::VectorXd ExtendedKalmanFilter::update(
   double nis = residual.transpose() * S.inverse() * residual;
   double nees = (x - x_prior).transpose() * P.inverse() * (x - x_prior);
 
-  // 卡方检验阈值（自由度=4，取置信水平95%）
-  constexpr double nis_threshold = 0.711;
-  constexpr double nees_threshold = 0.711;
+  // 卡方检验阈值（95%，按量测维数）
+  const int dof = static_cast<int>(residual.size());
+  auto chi2_95 = [](int d) -> double {
+    static const double kTable[] = {0.0, 3.841, 5.991, 7.815, 9.488, 11.070};
+    if (d >= 1 && d < static_cast<int>(sizeof(kTable) / sizeof(kTable[0]))) return kTable[d];
+    return 9.488;
+  };
+  const double nis_threshold = chi2_95(dof);
+  const double nees_threshold = chi2_95(static_cast<int>(x.rows()));
 
   if (nis > nis_threshold) nis_count_++, data["nis_fail"] = 1;
   if (nees > nees_threshold) nees_count_++, data["nees_fail"] = 1;
@@ -80,10 +86,10 @@ Eigen::VectorXd ExtendedKalmanFilter::update(
   int recent_failures = std::accumulate(recent_nis_failures.begin(), recent_nis_failures.end(), 0);
   double recent_rate = static_cast<double>(recent_failures) / recent_nis_failures.size();
 
-  data["residual_yaw"] = residual[0];
-  data["residual_pitch"] = residual[1];
-  data["residual_distance"] = residual[2];
-  data["residual_angle"] = residual[3];
+  if (residual.size() > 0) data["residual_yaw"] = residual[0];
+  if (residual.size() > 1) data["residual_pitch"] = residual[1];
+  if (residual.size() > 2) data["residual_distance"] = residual[2];
+  if (residual.size() > 3) data["residual_angle"] = residual[3];
   data["nis"] = nis;
   data["nees"] = nees;
   data["recent_nis_failures"] = recent_rate;
