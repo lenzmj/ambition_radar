@@ -361,8 +361,7 @@ int main() {
             {   //别动这个{}锁，保护整个对齐过程的，确保姿态数据不被串口线程修改[cite: 3]
                 lock_guard<mutex> lock(pose_mtx);
                 if (!pose_buffer.empty()) {
-                    // 修改原因：遍历 Buffer，寻找时间戳与图像 local_timestamp 最接近的那一组 RPY。
-                    // 15m 精度要求下，寻找最近邻是最稳健的做法[cite: 3, 5]
+                    // 遍历 Buffer，寻找时间戳与图像 local_timestamp 最接近的那一组 RPY。
                     uint64_t min_diff = 0xFFFFFFFFFFFFFFFF;
                     auto best_it = pose_buffer.begin();
 
