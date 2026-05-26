@@ -326,7 +326,7 @@ int main() {
         if (has_new_frame) {
             frame_mtx.lock();
             shared_frame.copyTo(local_frame);
-            local_timestamp = shared_timestamp; // 修改：拷贝对应的采集时间
+            local_timestamp = shared_timestamp; //拷贝对应的采集时间
             has_new_frame = false;
             frame_mtx.unlock();
 
@@ -352,7 +352,7 @@ int main() {
                 }
             }
 
-            // --- 修改部分：时间戳对齐逻辑 ---
+            //时间戳对齐逻辑 ---
             float matched_yaw = 0.000f;
             float matched_pitch = 0.000f;
             float matched_roll = 0.000f;
