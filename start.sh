@@ -2,7 +2,33 @@
 # ambition_radar 一键启动脚本
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
+find_project_root() {
+    if [[ -n "${AMBITION_RADAR_ROOT:-}" ]]; then
+        echo "$AMBITION_RADAR_ROOT"
+        return 0
+    fi
+
+    local dir="$SCRIPT_DIR"
+    while [[ "$dir" != "/" ]]; do
+        if [[ -f "$dir/CMakeLists.txt" && -f "$dir/config/config.yaml" ]]; then
+            echo "$dir"
+            return 0
+        fi
+        dir="$(dirname "$dir")"
+    done
+
+    local fallback="$HOME/ws/ambition_radar"
+    if [[ -f "$fallback/CMakeLists.txt" && -f "$fallback/config/config.yaml" ]]; then
+        echo "$fallback"
+        return 0
+    fi
+
+    echo "$SCRIPT_DIR"
+}
+
+ROOT="$(find_project_root)"
 BUILD_DIR="$ROOT/build"
 APP="$BUILD_DIR/app"
 CONFIG="$ROOT/config/config.yaml"
@@ -60,7 +86,10 @@ build_app() {
 
 check_prerequisites() {
     if [[ ! -f "$CONFIG" ]]; then
-        echo "[start] 错误: 配置文件不存在: $CONFIG" >&2
+        echo "[start] 错误: 找不到项目目录（缺少 config/config.yaml）" >&2
+        echo "[start] 脚本位置: $SCRIPT_DIR" >&2
+        echo "[start] 尝试过的项目根: $ROOT" >&2
+        echo "[start] 可设置环境变量: export AMBITION_RADAR_ROOT=/path/to/ambition_radar" >&2
         exit 1
     fi
 
@@ -81,6 +110,7 @@ main() {
 
     setup_runtime_env
 
+    echo "[start] 项目目录: $ROOT"
     echo "[start] 配置文件: $CONFIG"
     echo "[start] 启动 ambition_radar..."
     cd "$ROOT"
