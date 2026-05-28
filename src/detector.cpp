@@ -1,17 +1,65 @@
 #include "detector.h"
 #include "yaml.hpp"
+#include <algorithm>
+#include <cctype>
+#include <filesystem>
 #include <iostream>
 
 using namespace cv;
 using namespace std;
 
+namespace {
+
+string to_lower_ascii(string s) {
+    transform(s.begin(), s.end(), s.begin(),
+              [](unsigned char c) { return static_cast<char>(tolower(c)); });
+    return s;
+}
+
+/** 数据集 0=blue, 1=red；敌方类别与己方相反 */
+int enemy_class_from_our_side(const string& our_side) {
+    const string side = to_lower_ascii(our_side);
+    if (side == "blue") {
+        return 1;
+    }
+    if (side != "red") {
+        cerr << "[Detector 警告] hardware.our_side 应为 red 或 blue，当前为 \"" << our_side
+             << "\"，按 red（敌方 blue/0）处理\n";
+    }
+    return 0;
+}
+
+string resolve_model_path(const string& our_side) {
+    auto& cfg = ConfigManager::getInstance();
+    const string override_path = cfg.get<string>("hardware.model_path", "");
+    if (!override_path.empty()) {
+        return override_path;
+    }
+
+    const string model_dir = cfg.get<string>("hardware.model_dir", "");
+    const string side = to_lower_ascii(our_side);
+    const string filename = (side == "blue")
+                                ? cfg.get<string>("hardware.model_blue", "red.engine")
+                                : cfg.get<string>("hardware.model_red", "blue_zmj.engine");
+    if (model_dir.empty()) {
+        return filename;
+    }
+    return (std::filesystem::path(model_dir) / filename).string();
+}
+
+}  // namespace
+
 Detector::Detector() {
     auto& cfg = ConfigManager::getInstance();
     const string backend = cfg.get<string>("hardware.inference_backend", "openvino");
-    const string model_path = cfg.get<string>("hardware.model_path", "");
+    const string our_side = cfg.get<string>("hardware.our_side", "red");
+    const string model_path = resolve_model_path(our_side);
+    enemy_class_id_ = enemy_class_from_our_side(our_side);
     try {
         backend_ = create_yolo_infer_backend(backend, model_path);
         cout << "[Detector] 推理后端: " << backend << endl;
+        cout << "[Detector] 我方: " << our_side << "，模型: " << model_path << "，敌方类别索引: "
+             << enemy_class_id_ << " (0=blue, 1=red)" << endl;
     } catch (const exception& e) {
         cerr << "[Detector 错误] 初始化失败: " << e.what() << endl;
     }
@@ -43,11 +91,18 @@ vector<DetectResult> Detector::run_yolo(Mat& frame) {
     float scale_x = static_cast<float>(frame.cols) / 640.0f;
     float scale_y = static_cast<float>(frame.rows) / 640.0f;
 
+    const int score_channel = 4 + enemy_class_id_;
+    if (score_channel >= dimensions - 1) {
+        cerr << "[Detector 错误] 输出维度 " << dimensions << " 不足以读取敌方类别 " << enemy_class_id_
+             << "，请检查 hardware.our_side 与模型类别数\n";
+        return final_results;
+    }
+
     float max_score = -1.0f;
     int best_idx = -1;
 
     for (int i = 0; i < rows; ++i) {
-        float score = data[4 * rows + i];
+        float score = data[score_channel * rows + i];
         if (score > yaml_conf && score > max_score) {
             max_score = score;
             best_idx = i;
