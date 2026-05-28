@@ -25,7 +25,7 @@
 using namespace std;
 using namespace cv;
 
-// 修改：定义云台姿态结构体，将角度与时间戳绑定[cite: 3]
+// 定义云台姿态结构体，将角度与时间戳绑定
 struct GimbalPose {
     float yaw;
     float pitch;
@@ -264,7 +264,7 @@ int main() {
                                    cfg.get<double>("camera.gain", -1.0));
         if (!camera.connect(target_sn))
             return -1;
-        std::cout << "[run] 模式 hik：海康实时 + 串口解算";
+        std::cout << "[run] 模式 hik:海康实时 + 串口解算";
         if (want_record)
             std::cout << " + 录制";
         std::cout << "\n";
@@ -278,9 +278,9 @@ int main() {
             return -1;
         }
         if (want_record) {
-            std::cerr << "[run] test 模式忽略 dataset.record_enabled（不录制）\n";
+            std::cerr << "[run] test 模式忽略 dataset.record_enabled(不录制)\n";
         }
-        std::cout << "[run] 模式 test：MP4 回放 + YOLO 画框（无相机/串口）\n";
+        std::cout << "[run] 模式 test:MP4 回放 + YOLO 画框（无相机/串口）\n";
     }
 
     Detector pikachu_ai;
@@ -302,9 +302,9 @@ int main() {
     const string record_dir = cfg.get<string>("dataset.record_dir", "dataset/match");
     const bool record_enabled = is_hik && want_record;
     const double record_max_fps = cfg.get<double>("dataset.record_max_fps", 15.0);
-    const double record_min_interval_s =
-        (record_max_fps > 0.0) ? (1.0 / record_max_fps) : 0.0;
+    const double record_min_interval_s = (record_max_fps > 0.0) ? (1.0 / record_max_fps) : 0.0;
     const double record_fps_meta = (record_max_fps > 0.0) ? record_max_fps : 30.0;
+    const double lost_time = cfg.get<double>("params.lost_time", 1.5);
     string record_video_path;
     thread t_record;
     auto last_record_push = std::chrono::steady_clock::time_point{};
@@ -318,6 +318,27 @@ int main() {
     bool have_calib_snap = false;
     float calib_pnp_tx = 0.f, calib_pnp_ty = 0.f, calib_pnp_tz = 0.f;
     SendPacket tx_pkt;
+    auto last_detect_time = std::chrono::steady_clock::now();
+
+    auto send_idle = [&]() {
+        tx_pkt.mode = 0;
+        tx_pkt.pitch = 0.f;
+        tx_pkt.yaw = 0.f;
+        tx_pkt.distance = 0.f;
+        if (is_hik)
+            serial->send_packet(tx_pkt);
+    };
+
+    auto on_target_lost = [&]() {
+        const auto now = std::chrono::steady_clock::now();
+        const double lost_s =
+            std::chrono::duration<double>(now - last_detect_time).count();
+        if (lost_s >= lost_time) {
+            send_idle();
+            math_solver.reset_filter();
+            have_calib_snap = false;
+        }
+    };
 
     namedWindow("Pikachu View", WINDOW_NORMAL);
     resizeWindow("Pikachu View", 800, 600);
@@ -380,10 +401,13 @@ int main() {
                 }
             }
 
-            if (!find_matched && is_hik)
+            if (!find_matched && is_hik) {
+                on_target_lost();
                 continue;
+            }
 
             vector<DetectResult> results = pikachu_ai.run_yolo(local_frame);
+            const bool fresh_det = pikachu_ai.last_detection_fresh();
 
             if (is_test) {
                 if (!results.empty()) {
@@ -394,13 +418,8 @@ int main() {
                     }
                     draw_yolo_only_preview(local_frame, *best);
                 }
-            } else if (results.empty()) {
-                math_solver.reset_filter();
-                have_calib_snap = false;
-                tx_pkt.mode = 0;
-                if (is_hik)
-                    serial->send_packet(tx_pkt);
-            } else {
+            }
+            else if (fresh_det && !results.empty()) {
                 const DetectResult* best = &results[0];
                 for (size_t i = 1; i < results.size(); ++i) {
                     if (results[i].score > best->score)
@@ -417,18 +436,29 @@ int main() {
                                       math_solver.cam_offset, math_solver.ray_offset, math_solver.R_cam_to_ray,
                                       cmd.pnp_tx, cmd.pnp_ty, cmd.pnp_tz);
 
-                local_frame.copyTo(last_calib_frame);
-                calib_pnp_tx = cmd.pnp_tx;
-                calib_pnp_ty = cmd.pnp_ty;
-                calib_pnp_tz = cmd.pnp_tz;
-                have_calib_snap = true;
+                if (cmd.pnp_tz > 1e-4f) {
+                    last_detect_time = std::chrono::steady_clock::now();
+                    local_frame.copyTo(last_calib_frame);
+                    calib_pnp_tx = cmd.pnp_tx;
+                    calib_pnp_ty = cmd.pnp_ty;
+                    calib_pnp_tz = cmd.pnp_tz;
+                    have_calib_snap = true;
 
-                tx_pkt.mode = 1;
-                tx_pkt.pitch = cmd.target_pitch;
-                tx_pkt.yaw = cmd.target_yaw;
-                tx_pkt.distance = cmd.p_world_x;
-                if (is_hik)
-                    serial->send_packet(tx_pkt);
+                    tx_pkt.mode = 1;
+                    tx_pkt.pitch = cmd.target_pitch;
+                    tx_pkt.yaw = cmd.target_yaw;
+                    tx_pkt.distance = cmd.p_world_x;
+                    if (is_hik)
+                        serial->send_packet(tx_pkt);
+                } else {
+                    on_target_lost();
+                }
+            } else {
+                // 无真实检出（含 Detector 补帧）：丢失计时从最后一次有效跟踪算起
+                if (!results.empty())
+                    draw_yolo_only_preview(local_frame, results[0]);
+
+                on_target_lost();
             }
 
             drawer.draw_display_fps(local_frame);
@@ -444,7 +474,7 @@ int main() {
         // W：相机系→激光系 rpy 两点标定（仅 hik）；结果打印到终端，手动写入 config offset.rpy_cam_to_ray
         if ((key == 'w' || key == 'W') && is_hik) {
             if (!have_calib_snap || calib_pnp_tz <= 1e-4f) {
-                std::cerr << "[rpy_calib] 无有效帧：请先稳定跟踪目标（出 LASER_REF）后再按 W。\n";
+                std::cerr << "[rpy_calib] 无有效帧：请先稳定跟踪目标（出 LASER_REF)后再按 W。\n";
             } else {
                 RpyCamToRayInput cinp;
                 last_calib_frame.copyTo(cinp.frame_bgr);  // 带检测叠加的最后一帧，供弹窗点选

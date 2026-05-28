@@ -17,6 +17,8 @@ class Detector {
 public:
     Detector();
     std::vector<DetectResult> run_yolo(cv::Mat& frame);
+    /** 上一帧 run_yolo 是否为 YOLO 真实检出（非补帧 holdover） */
+    bool last_detection_fresh() const { return last_detection_fresh_; }
 
 private:
     std::unique_ptr<IYoloInferBackend> backend_;
@@ -27,5 +29,6 @@ private:
     DetectResult last_res;
     bool has_history = false;
     int lose_cnt = 0;
+    bool last_detection_fresh_ = false;
 };
 #endif

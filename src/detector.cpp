@@ -22,6 +22,7 @@ vector<DetectResult> Detector::run_yolo(Mat& frame) {
     float yaml_conf = cfg.get<float>("params.conf_threshold", 0.6f);
     float yaml_alpha = cfg.get<float>("params.det_alpha", 0.1f);
 
+    last_detection_fresh_ = false;
     vector<DetectResult> final_results;
     if (frame.empty() || !backend_) {
         return final_results;
@@ -93,6 +94,7 @@ vector<DetectResult> Detector::run_yolo(Mat& frame) {
             last_res.score = max_score;
         }
         lose_cnt = 0;
+        last_detection_fresh_ = true;
         final_results.push_back(last_res);
     } else if (has_history && lose_cnt < 2) {
         lose_cnt++;

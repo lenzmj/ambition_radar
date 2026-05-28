@@ -282,7 +282,7 @@ app: /usr/local/lib/libopencv_videoio.so.4.6.0
 app: /opt/intel/openvino_2024.6/runtime/lib/intel64/libopenvino.so.2024.6.0
 app: /usr/lib/x86_64-linux-gnu/libyaml-cpp.so.0.7.0
 app: /usr/lib/x86_64-linux-gnu/libnvinfer.so
-app: /usr/local/cuda-12.8/targets/x86_64-linux/lib/libcudart.so
+app: /usr/local/cuda-12.8/lib64/libcudart.so
 app: /usr/local/lib/libopencv_imgcodecs.so.4.6.0
 app: /usr/local/lib/libopencv_dnn.so.4.6.0
 app: /usr/local/lib/libopencv_calib3d.so.4.6.0

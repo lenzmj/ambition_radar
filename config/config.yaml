@@ -12,7 +12,7 @@ hardware:
   # 推理后端：openvino | tensorrt（TensorRT 时 model_path 填 .engine）
   inference_backend: tensorrt
   # model_path: "/home/lenzmj/ws/ambition_radar/openvino_model/red.xml"
-  model_path: "/home/lenzmj/ws/ambition_radar/openvino_model/best_trt.engine"
+  model_path: "/home/lenzmj/ws/ambition_radar/model/blue_zmj.engine"
 
 # -----------------------------------------------------------------------------
 # 2. 运行模式（二选一）
@@ -20,29 +20,29 @@ hardware:
 #   test — 赛后复盘：只读 MP4 + YOLO 画框，不接相机、不录制
 # -----------------------------------------------------------------------------
 run:
-  mode: test
+  mode: hik
 
 # 仅 run.mode: hik 时有效；输出 record_<时间戳>.mp4（YOLO 输入 BGR，无框）
 dataset:
   record_dir: "/home/lenzmj/ws/ambition_radar/data/match"
-  record_enabled: true
+  record_enabled: false
   record_max_fps: 30
 
 # 仅 run.mode: test 时有效
 test:
-  video_path: "/home/lenzmj/ws/ambition_radar/data/match/record_20260526_160205.mp4"
+  video_path: "/home/lenzmj/ws/ambition_radar/data/match/cqlg_test.mp4"
   loop: true
 
 # -----------------------------------------------------------------------------
 # 3. 相机内参（标定结果）
 # -----------------------------------------------------------------------------
 camera:
-  fx: 20063.748898
-  fy: 19982.812741
-  cx: 592.009929
-  cy: 764.874241
+  fx: 19132.540031
+  fy: 19144.306803
+  cx: 1320.015470
+  cy: 1726.291619
   # 畸变系数 [k1, k2, p1, p2, k3]
-  dist_coeffs: [0.917283, -0.809742, -0.027633, -0.060460, 0.0]
+  dist_coeffs: [0.593819, -9.999671, 0.024214, -0.008752, 0.0]
   # 曝光 (µs)、增益 (dB)；负数或不写则不改相机当前值
   exposure_time_us: 2500
   gain: 21.7
@@ -61,7 +61,7 @@ target:
 # -----------------------------------------------------------------------------
 params:
   # --- YOLO 检测 ---
-  conf_threshold: 0.7   # 置信度阈值，越高越不易误检、可能漏检
+  conf_threshold: 0.79   # 置信度阈值，越高越不易误检、可能漏检
   det_alpha: 0.9        # 角点指数平滑，越大越跟手、越小越稳
 
   # --- EKF 位置预测 + 提前量瞄准 ---
@@ -76,6 +76,7 @@ params:
 
   lock_range: 0.08    # 判定「锁定」的角度误差 (度)，远距可适当减小
   lock_beam_deg: 0.04 # 激光轴对准角阈值 (度)；-1 关闭
+  lost_time: 0.7 # 连续未识别多久后发 mode=0 给下位机 (s)
 
   # --- 激光 IK 网格搜索（在初值附近搜最优 yaw/pitch）---
   ik_half_deg: 10           # 粗搜：相对初值 yaw/pitch 各向 ± 度数
@@ -94,6 +95,13 @@ offset:
   ray_to_gimbal: [-0.00706, 0.0, 0.1065]
   # 相机系 -> 激光系，[roll, pitch, yaw] 单位度；机体 +X前 +Y左 +Z上
   # rpy_cam_to_ray: [0.000000, -1.112865, 2.796609]
-  rpy_cam_to_ray: [0.000000, -0.262253, 2.906147]
+  rpy_cam_to_ray: [0.000000, 2.586553, 0.847615]
+
+
+
+
+
+
+
 
 
