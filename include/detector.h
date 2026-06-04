@@ -30,7 +30,5 @@ private:
     bool has_history = false;
     int lose_cnt = 0;
     bool last_detection_fresh_ = false;
-    /** 敌方 YOLO 类别索引：0=blue, 1=red（由 hardware.our_side 推导） */
-    int enemy_class_id_ = 0;
 };
 #endif

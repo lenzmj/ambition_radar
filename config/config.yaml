@@ -13,8 +13,6 @@ hardware:
   inference_backend: tensorrt
   # model_path: "/home/lenzmj/ws/ambition_radar/openvino_model/red.xml"
   model_path: "/home/lenzmj/ws/ambition_radar/model/blue_zmj.engine"
-  # model_path: "/home/lenzmj/ws/ambition_radar/model/red.engine"
-  
 
 # -----------------------------------------------------------------------------
 # 2. 运行模式（二选一）
@@ -27,7 +25,7 @@ run:
 # 仅 run.mode: hik 时有效；输出 record_<时间戳>.mp4（YOLO 输入 BGR，无框）
 dataset:
   record_dir: "/home/lenzmj/ws/ambition_radar/data/match"
-  record_enabled: true
+  record_enabled: false
   record_max_fps: 30
 
 # 仅 run.mode: test 时有效
@@ -63,7 +61,7 @@ target:
 # -----------------------------------------------------------------------------
 params:
   # --- YOLO 检测 ---
-  conf_threshold: 0.87  # 置信度阈值，越高越不易误检、可能漏检
+  conf_threshold: 0.79   # 置信度阈值，越高越不易误检、可能漏检
   det_alpha: 0.9        # 角点指数平滑，越大越跟手、越小越稳
 
   # --- EKF 位置预测 + 提前量瞄准 ---
