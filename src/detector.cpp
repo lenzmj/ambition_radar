@@ -1,17 +1,35 @@
 #include "detector.h"
 #include "yaml.hpp"
+#include <algorithm>
+#include <cctype>
 #include <iostream>
 
 using namespace cv;
 using namespace std;
 
+static int enemy_class_id_from_our_side(const string& our_side) {
+    string s = our_side;
+    for (char& c : s) {
+        c = static_cast<char>(tolower(static_cast<unsigned char>(c)));
+    }
+    if (s == "blue") {
+        return 1;  // 我方蓝 -> 敌方红
+    }
+    return 0;  // 默认 red：我方红 -> 敌方蓝
+}
+
 Detector::Detector() {
     auto& cfg = ConfigManager::getInstance();
     const string backend = cfg.get<string>("hardware.inference_backend", "openvino");
     const string model_path = cfg.get<string>("hardware.model_path", "");
+    const string our_side = cfg.get<string>("hardware.our_side", "red");
+    const int enemy_class_id = enemy_class_id_from_our_side(our_side);
+    enemy_score_channel_ = 4 + enemy_class_id;
     try {
         backend_ = create_yolo_infer_backend(backend, model_path);
         cout << "[Detector] 推理后端: " << backend << endl;
+        cout << "[Detector] 我方: " << our_side << "，敌方类别 id=" << enemy_class_id
+             << "（0=blue 1=red），得分通道=" << enemy_score_channel_ << endl;
     } catch (const exception& e) {
         cerr << "[Detector 错误] 初始化失败: " << e.what() << endl;
     }
@@ -43,11 +61,15 @@ vector<DetectResult> Detector::run_yolo(Mat& frame) {
     float scale_x = static_cast<float>(frame.cols) / 640.0f;
     float scale_y = static_cast<float>(frame.rows) / 640.0f;
 
+    const int num_classes = dimensions - 5;  // cx,cy,w,h + classes + angle
+    const int score_channel =
+        (num_classes <= 1) ? 4 : std::min(enemy_score_channel_, dimensions - 2);
+
     float max_score = -1.0f;
     int best_idx = -1;
 
     for (int i = 0; i < rows; ++i) {
-        float score = data[4 * rows + i];
+        float score = data[score_channel * rows + i];
         if (score > yaml_conf && score > max_score) {
             max_score = score;
             best_idx = i;

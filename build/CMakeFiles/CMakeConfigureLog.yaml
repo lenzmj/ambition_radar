@@ -55937,3 +55937,247 @@ events:
       CMAKE_SYSTEM_LIBRARY_PATH:
         - "/usr/lib/X11"
 ...
+
+---
+events:
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/share/cmake-4.1/Modules/FindCUDAToolkit.cmake:1043 (find_path)"
+      - "CMakeLists.txt:22 (find_package)"
+    mode: "path"
+    variable: "CUDAToolkit_CUBLAS_INCLUDE_DIR"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "cublas_v2.h"
+    candidate_directories:
+      - "/usr/local/cuda-12.8/targets/x86_64-linux/include/"
+    found: "/usr/local/cuda-12.8/targets/x86_64-linux/include/"
+    search_context:
+      package_stack:
+        -
+          package_paths:
+            - "/usr/local/cuda-12.8"
+      CMAKE_PREFIX_PATH:
+        - "/usr/local/cuda-12.8"
+        - "/usr/local/cuda-12.8"
+      ENV{PATH}:
+        - "/home/lenzmj/.local/bin"
+        - "/usr/src/tensorrt/bin"
+        - "/usr/share/cursor/resources/app/resources/helpers"
+        - "/home/lenzmj/.local/bin"
+        - "/usr/src/tensorrt/bin"
+        - "/opt/ros/humble/bin"
+        - "/home/lenzmj/anaconda3/condabin"
+        - "/home/lenzmj/.local/bin"
+        - "/usr/local/sbin"
+        - "/usr/local/bin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/snap/bin"
+        - "/snap/bin"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_INCLUDE_PATH:
+        - "/usr/include/X11"
+...
+
+---
+events:
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/share/cmake-4.1/Modules/FindCUDAToolkit.cmake:1043 (find_path)"
+      - "CMakeLists.txt:22 (find_package)"
+    mode: "path"
+    variable: "CUDAToolkit_CUBLAS_INCLUDE_DIR"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "cublas_v2.h"
+    candidate_directories:
+      - "/usr/local/cuda-12.8/targets/x86_64-linux/include/"
+    found: "/usr/local/cuda-12.8/targets/x86_64-linux/include/"
+    search_context:
+      package_stack:
+        -
+          package_paths:
+            - "/usr/local/cuda-12.8"
+      CMAKE_PREFIX_PATH:
+        - "/usr/local/cuda-12.8"
+        - "/usr/local/cuda-12.8"
+      ENV{PATH}:
+        - "/usr/src/tensorrt/bin"
+        - "/opt/ros/humble/bin"
+        - "/home/lenzmj/anaconda3/condabin"
+        - "/home/lenzmj/.local/bin"
+        - "/usr/local/sbin"
+        - "/usr/local/bin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/snap/bin"
+        - "/snap/bin"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_INCLUDE_PATH:
+        - "/usr/include/X11"
+...
+
+---
+events:
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/share/cmake-4.1/Modules/FindCUDAToolkit.cmake:1043 (find_path)"
+      - "CMakeLists.txt:22 (find_package)"
+    mode: "path"
+    variable: "CUDAToolkit_CUBLAS_INCLUDE_DIR"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "cublas_v2.h"
+    candidate_directories:
+      - "/usr/local/cuda-12.8/targets/x86_64-linux/include/"
+    found: "/usr/local/cuda-12.8/targets/x86_64-linux/include/"
+    search_context:
+      package_stack:
+        -
+          package_paths:
+            - "/usr/local/cuda-12.8"
+      CMAKE_PREFIX_PATH:
+        - "/usr/local/cuda-12.8"
+        - "/usr/local/cuda-12.8"
+      ENV{PATH}:
+        - "/usr/src/tensorrt/bin"
+        - "/opt/ros/humble/bin"
+        - "/home/lenzmj/anaconda3/condabin"
+        - "/home/lenzmj/.local/bin"
+        - "/usr/local/sbin"
+        - "/usr/local/bin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/snap/bin"
+        - "/snap/bin"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_INCLUDE_PATH:
+        - "/usr/include/X11"
+...
+
+---
+events:
+  -
+    kind: "find-v1"
+    backtrace:
+      - "/usr/share/cmake-4.1/Modules/FindCUDAToolkit.cmake:1043 (find_path)"
+      - "CMakeLists.txt:22 (find_package)"
+    mode: "path"
+    variable: "CUDAToolkit_CUBLAS_INCLUDE_DIR"
+    description: "Path to a file."
+    settings:
+      SearchFramework: "NEVER"
+      SearchAppBundle: "NEVER"
+      CMAKE_FIND_USE_CMAKE_PATH: true
+      CMAKE_FIND_USE_CMAKE_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_SYSTEM_ENVIRONMENT_PATH: true
+      CMAKE_FIND_USE_CMAKE_SYSTEM_PATH: true
+      CMAKE_FIND_USE_INSTALL_PREFIX: true
+    names:
+      - "cublas_v2.h"
+    candidate_directories:
+      - "/usr/local/cuda-12.8/targets/x86_64-linux/include/"
+    found: "/usr/local/cuda-12.8/targets/x86_64-linux/include/"
+    search_context:
+      package_stack:
+        -
+          package_paths:
+            - "/usr/local/cuda-12.8"
+      CMAKE_PREFIX_PATH:
+        - "/usr/local/cuda-12.8"
+        - "/usr/local/cuda-12.8"
+      ENV{PATH}:
+        - "/usr/src/tensorrt/bin"
+        - "/opt/ros/humble/bin"
+        - "/home/lenzmj/anaconda3/condabin"
+        - "/home/lenzmj/.local/bin"
+        - "/usr/local/sbin"
+        - "/usr/local/bin"
+        - "/usr/sbin"
+        - "/usr/bin"
+        - "/sbin"
+        - "/bin"
+        - "/usr/games"
+        - "/usr/local/games"
+        - "/snap/bin"
+        - "/snap/bin"
+      CMAKE_INSTALL_PREFIX: "/usr/local"
+      CMAKE_SYSTEM_PREFIX_PATH:
+        - "/usr/local"
+        - "/usr"
+        - "/"
+        - "/usr"
+        - "/usr/local"
+        - "/usr/X11R6"
+        - "/usr/pkg"
+        - "/opt"
+      CMAKE_SYSTEM_INCLUDE_PATH:
+        - "/usr/include/X11"
+...

@@ -377,7 +377,4 @@ CMakeFiles/app.dir/src/detector.cpp.o: \
  /usr/include/yaml-cpp/node/detail/iterator.h /usr/include/c++/11/atomic \
  /usr/include/yaml-cpp/node/convert.h \
  /usr/include/yaml-cpp/node/detail/impl.h \
- /usr/include/yaml-cpp/node/parse.h /usr/include/yaml-cpp/node/emit.h \
- /usr/include/c++/11/filesystem /usr/include/c++/11/bits/fs_fwd.h \
- /usr/include/c++/11/bits/fs_path.h /usr/include/c++/11/codecvt \
- /usr/include/c++/11/bits/fs_dir.h /usr/include/c++/11/bits/fs_ops.h
+ /usr/include/yaml-cpp/node/parse.h /usr/include/yaml-cpp/node/emit.h

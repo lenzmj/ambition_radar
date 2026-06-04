@@ -1,7 +1,4 @@
-# =============================================================================
-# ambition_radar 主配置文件
-# 修改后需重启程序生效；路径请按本机实际目录填写。
-# =============================================================================
+
 
 # -----------------------------------------------------------------------------
 # 1. 硬件与推理
@@ -11,8 +8,15 @@ hardware:
   serial_port: "/dev/ttyACM0"
   # 推理后端：openvino | tensorrt（TensorRT 时 model_path 填 .engine）
   inference_backend: tensorrt
-  # model_path: "/home/lenzmj/ws/ambition_radar/openvino_model/red.xml"
+
+  # 我方红 -> 敌方蓝：blue_zmj.engine
+  our_side: red
   model_path: "/home/lenzmj/ws/ambition_radar/model/blue_zmj.engine"
+
+  # 我方蓝 -> 敌方红：red.engine
+  #our_side: blue
+  #model_path: "/home/lenzmj/ws/ambition_radar/model/red.engine"
+  
 
 # -----------------------------------------------------------------------------
 # 2. 运行模式（二选一）
@@ -25,12 +29,12 @@ run:
 # 仅 run.mode: hik 时有效；输出 record_<时间戳>.mp4（YOLO 输入 BGR，无框）
 dataset:
   record_dir: "/home/lenzmj/ws/ambition_radar/data/match"
-  record_enabled: false
+  record_enabled: true
   record_max_fps: 30
 
 # 仅 run.mode: test 时有效
 test:
-  video_path: "/home/lenzmj/ws/ambition_radar/data/match/cqlg_test.mp4"
+  video_path: "/home/lenzmj/ws/ambition_radar/data/match/vs西瓜大2.mp4"
   loop: true
 
 # -----------------------------------------------------------------------------
@@ -61,41 +65,58 @@ target:
 # -----------------------------------------------------------------------------
 params:
   # --- YOLO 检测 ---
-  conf_threshold: 0.79   # 置信度阈值，越高越不易误检、可能漏检
+  conf_threshold: 0.87 # 置信度阈值，越高越不易误检、可能漏检
   det_alpha: 0.9        # 角点指数平滑，越大越跟手、越小越稳
 
   # --- EKF 位置预测 + 提前量瞄准 ---
+  # 工况占比：~0.3 m/s 微动 ~400 s（主）| ~1 m/s 平移 ~10 s（次，可略滞后）
   ekf:
-    predict_horizon_s: 0.15  # 提前瞄准时间 (s)
-    default_dt_s: 0.0167     # 无有效时间戳时的帧间隔
-    Q_pos: 0.02              # 过程噪声：位置，越大越跟测量
-    Q_vel: 0.5               # 过程噪声：速度
-    R_pos: 0.08              # 量测噪声：PnP 位置，越大越平滑
-    init_P_pos: 2.0
-    init_P_vel: 20.0
+    predict_horizon_s: 0.177 # 提前瞄准 (s)；慢动少过冲；快移仍滞后可试 0.16~0.17
+    default_dt_s: 0.0333     # 无有效时间戳时的帧间隔 (~30 fps)
+    Q_pos: 0.02              # 过程噪声：位置
+    Q_vel: 0.35              # 过程噪声：速度；略降，减轻慢动时 PnP 假速度
+    R_pos: 0.10              # 量测噪声：PnP 位置；略升，压微动段抖动
+    init_P_pos: 1.0
+    init_P_vel: 10.0
 
   lock_range: 0.08    # 判定「锁定」的角度误差 (度)，远距可适当减小
   lock_beam_deg: 0.04 # 激光轴对准角阈值 (度)；-1 关闭
   lost_time: 0.7 # 连续未识别多久后发 mode=0 给下位机 (s)
 
   # --- 激光 IK 网格搜索（在初值附近搜最优 yaw/pitch）---
-  ik_half_deg: 10           # 粗搜：相对初值 yaw/pitch 各向 ± 度数
-  ik_coarse_step_deg: 1.8   # 粗搜步长 (度)
+  ik_half_deg: 7.0        # 粗搜：相对初值 yaw/pitch 各向 ± 度数
+  ik_coarse_step_deg: 1.4   # 粗搜步长 (度)
   ik_fine_passes: 2         # 细搜轮数
-  ik_fine_half_deg: 2       # 细搜：当前最优附近 ± 度数
-  ik_fine_step_deg: 0.09    # 细搜步长 (度)
+  ik_fine_half_deg: 1.75      # 细搜：当前最优附近 ± 度数
+  ik_fine_step_deg: 0.07    # 细搜步长 (度)
 
 # -----------------------------------------------------------------------------
 # 6. 结构安装偏移（单位：米 / 度）
 # -----------------------------------------------------------------------------
 offset:
   # 相机光心相对云台旋转中心 [x前, y左, z上]
-  cam_to_gimbal: [-0.0000, 0.0, 0.08]
+  #cam_to_gimbal: [-0.0000, 0.0, 0.08]
   # 激光口相对云台旋转中心
+  #ray_to_gimbal: [-0.00706, 0.0, 0.1065]
+  cam_to_gimbal: [-0.0000, -0.00, 0.08]
   ray_to_gimbal: [-0.00706, 0.0, 0.1065]
   # 相机系 -> 激光系，[roll, pitch, yaw] 单位度；机体 +X前 +Y左 +Z上
   # rpy_cam_to_ray: [0.000000, -1.112865, 2.796609]
-  rpy_cam_to_ray: [0.000000, 2.586553, 0.847615]
+
+  #rpy_cam_to_ray: [0.000000, 2.662945, 0.821411]
+  rpy_cam_to_ray: [0.000000, 2.157781, 0.833969]
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 

@@ -30,5 +30,7 @@ private:
     bool has_history = false;
     int lose_cnt = 0;
     bool last_detection_fresh_ = false;
+    /** YOLO 输出中敌方类别得分通道（4 + class_id；数据集 0=blue 1=red） */
+    int enemy_score_channel_ = 4;
 };
 #endif
