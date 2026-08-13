@@ -2,9 +2,6 @@
 build/
 cmake-build-*/
 
-# 测试用旧模型不入库（比赛权重 model/match 会提交）
-model/test/
-
 # 数据集 / 录像
 data/
 *.mp4
