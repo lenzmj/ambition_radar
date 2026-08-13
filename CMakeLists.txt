@@ -15,7 +15,16 @@ find_package(yaml-cpp REQUIRED)
 set(MVS_INCLUDE_DIR /opt/MVS/include)
 set(MVS_LIBRARY_DIR /opt/MVS/lib/64)
 
-file(GLOB AMB_SOURCES CONFIGURE_DEPENDS "src/*.cpp")
+# cam_to_ray / handeye 在 Tools/Calib 下多一层目录
+file(GLOB AMB_SOURCES CONFIGURE_DEPENDS
+    "src/*.cpp"
+    "src/*/*.cpp"
+    "src/*/*/*.cpp"
+    "src/*/*/*/*.cpp"
+)
+# 手眼工具单独可执行文件，不链进主程序 app
+list(FILTER AMB_SOURCES EXCLUDE REGEX ".*/Tools/Calib/handeye/.*")
+list(FILTER AMB_SOURCES EXCLUDE REGEX ".*/Tools/Calib/ray_to_gimbal/.*")
 
 set(AMBITION_TRT_READY FALSE)
 if(AMBITION_ENABLE_TRT)
@@ -29,7 +38,7 @@ if(AMBITION_ENABLE_TRT)
 endif()
 
 if(NOT AMBITION_TRT_READY)
-    list(FILTER AMB_SOURCES EXCLUDE REGEX ".*/yolo_backend_tensorrt\\.cpp$")
+    list(FILTER AMB_SOURCES EXCLUDE REGEX ".*/yolo_tensorrt\\.cpp$")
 endif()
 
 # 3. 头文件
@@ -64,3 +73,38 @@ if(AMBITION_TRT_READY)
     target_link_libraries(app PRIVATE ${NVINFER_LIBRARY} CUDA::cudart)
     message(STATUS "TensorRT backend enabled: ${NVINFER_LIBRARY}")
 endif()
+
+# ---------------------------------------------------------------------------
+# 手眼标定：src/Tools/Calib/handeye（独立可执行文件）
+# ---------------------------------------------------------------------------
+add_executable(handeye_capture
+    src/Tools/Calib/handeye/handeye_capture.cpp
+    src/Tools/Hik/HikDriver.cpp
+    src/Serial/SerialDriver.cpp
+    src/Serial/crc.cpp
+)
+target_link_libraries(handeye_capture PRIVATE
+    ${OpenCV_LIBS}
+    yaml-cpp
+    MvCameraControl
+    pthread
+    dl
+)
+
+add_executable(handeye_calibrate
+    src/Tools/Calib/handeye/handeye_calibrate.cpp
+)
+target_link_libraries(handeye_calibrate PRIVATE
+    ${OpenCV_LIBS}
+    yaml-cpp
+)
+
+# ---------------------------------------------------------------------------
+# 多距离 rpy → 改良 ray_to_gimbal：src/Tools/Calib/ray_to_gimbal
+# ---------------------------------------------------------------------------
+add_executable(ray_to_gimbal_calibrate
+    src/Tools/Calib/ray_to_gimbal/ray_to_gimbal_calibrate.cpp
+)
+target_link_libraries(ray_to_gimbal_calibrate PRIVATE
+    yaml-cpp
+)

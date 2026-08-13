@@ -1,3 +1,0 @@
-/home/lenzmj/ws/ambition_radar/build/CMakeFiles/app.dir
-/home/lenzmj/ws/ambition_radar/build/CMakeFiles/edit_cache.dir
-/home/lenzmj/ws/ambition_radar/build/CMakeFiles/rebuild_cache.dir

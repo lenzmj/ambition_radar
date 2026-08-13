@@ -42,7 +42,8 @@ public:
         std::lock_guard<std::mutex> lock(mtx_);
         try {
             YAML::Node node = findNode(key);
-            if (node && node.IsDefined()) {
+            // Null 节点（键不存在）对 string 会 as<> 成 "null"，必须排除
+            if (node && node.IsDefined() && !node.IsNull()) {
                 return node.as<T>();
             }
         } catch (...) {
