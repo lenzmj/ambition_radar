@@ -50,7 +50,7 @@ dataset:
 # video_path 支持 MP4/AVI，或 jpg/png 等单张照片
 # -----------------------------------------------------------------------------
 test:
-  video_path: "/home/lenzmj/ws/match/厦嘉1_B.mp4"
+  video_path: "/home/lenzmj/ws/match/复活赛/厦嘉1_B.mp4"
   # video_path: "/home/lenzmj/ws/match/xx.jpg"  # 照片也可
   loop: flase
   gain: 1.0       # >1 提亮低曝光素材（约 1.5~3.0）；1=原图
