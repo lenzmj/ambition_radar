@@ -143,12 +143,12 @@ make -C build/ -j$(nproc) handeye_capture handeye_calibrate ray_to_gimbal_calibr
 
 按顺序做，前一步结果写入 `config/config.yaml` 的 `offset`：
 
-| 步骤  | 工具  | 产出 | 说明 |
-|------ |------ |------|------|
-| 1 手眼  | `handeye_capture` → `handeye_calibrate` | `cam_to_gimbal`、`rpy_body_to_gimbal` | 棋盘固定、云台多姿态；采集按 **s**，建议 ≥15 组 |
-| 2 激光口位置  | 图纸/卡尺 | `ray_to_gimbal` | 激光口相对云台旋转中心的平移（米） |
-| 3 光轴  | `app` 按 **W** | `rpy_cam_to_ray` | 各工作距离各标一组；激光十字与击打点重合时采点 |
-| 4 视差修正（可选） | `ray_to_gimbal_calibrate` | 改良 `ray_to_gimbal` + 距离无关 `rpy_cam_to_ray` | 多距离 rpy 随距离漂时，填 `config/ray_to_gimbal.yaml` 后运行 |
+|  步骤  | 工具| 产出 | 说明 |
+|------ |-----|------|------|
+| 1 手眼   | `handeye_capture` → `handeye_calibrate`| `cam_to_gimbal`、`rpy_body_to_gimbal` | 棋盘固定、云台多姿态；采集按 **s**，建议 ≥15 组 |
+| 2 激光口位置   | 图纸/卡尺 | `ray_to_gimbal`| 激光口相对云台旋转中心的平移（米） |
+| 3 光轴   | `app` 按 **W** | `rpy_cam_to_ray`  各工作距离各标一组；激光十字与击打点重合时采点 |
+| 4 视差修正（可选）  | `ray_to_gimbal_calibrate`| 改良 `ray_to_gimbal` + 距离无关 `rpy_cam_to_ray` | 多距离 rpy 随距离漂时，填 `config/ray_to_gimbal.yaml` 后运行 |
 
 手眼流程：
 
