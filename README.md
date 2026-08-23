@@ -134,7 +134,7 @@ make -C build/ -j$(nproc) handeye_capture handeye_calibrate ray_to_gimbal_calibr
 适用：手眼与 `ray_to_gimbal` 已标好，仅需重调光轴。
 
 1. `config/config.yaml` 设 `run.mode: hik`，启动 `./build/app`
-2. 对准靶标，等界面出现 **LASER_REF**（稳定跟踪）
+2. 对准靶标，等界面出现 **LASER_REF*（稳定跟踪）
 3. 按 **W** → 先点模拟激光十字中心，再点实际击打点
 4. 终端打印 `rpy_cam_to_ray`，写入 `config.yaml` 的 `offset.rpy_cam_to_ray`
 5. 重启 `app` 验证
@@ -143,7 +143,7 @@ make -C build/ -j$(nproc) handeye_capture handeye_calibrate ray_to_gimbal_calibr
 
 按顺序做，前一步结果写入 `config/config.yaml` 的 `offset`：
 
-|  步骤  | 工具 | 产出 | 说明 |
+|  步骤 |工具| 产出 | 说明 |
 |---------|--------|------|------|
 | 1 手眼  | `handeye_capture` → `handeye_calibrate`| `cam_to_gimbal`、`rpy_body_to_gimbal` | 棋盘固定、云台多姿态；采集按 **s**，建议 ≥15 组 |
 | 2 激光位置 | 图纸/卡尺 | `ray_to_gimbal`| 激光口相对云台旋转中心的平移（米） |
