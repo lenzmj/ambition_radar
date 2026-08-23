@@ -9,63 +9,8 @@
 - 主色 + white 双模型检测，兼容 OpenVINO / TensorRT；参数均可在配置文件中调整，有架子、云台与工业相机即可运行。
 - 相较常见 Python / 2D 像素对准方案，本仓库为 C++ 实时闭环，并在三维空间完成 PnP、世界系匀速卡尔曼提前量与激光轴 IK，适配相机–激光相对云台中心偏置及十余米作业距离。
 
-## 1 算法与代码介绍
 
-本项目以工业单目相机目标检测为核心，经位姿解算、运动预测与激光轴逆解，构成「检测—解算—瞄准」完整闭环。上位机完成检测、解算与提前瞄准，下位机仅接收瞄准角指令并回传云台姿态，感知与执行分层解耦，精度高、延迟低。
-
-系统具备极强容错能力：如遇到突发情况（如跌落 / 剧烈震动）使精度受损，约 4s 的内置次级标定即可支撑大部分功能，卡尔曼预测与高精度提前瞄准则依赖完整全局标定链路。推理兼容 OpenVINO / TensorRT，取流适配海康工业相机；检测、解算、标定与通信参数均可在配置文件中调整，可拓展性强、造价低（有架子 / 云台 / 相机就能跑）。配套手眼与激光光轴标定工具，以及赛后回放模式，便于快速复现与持续迭代。
-
-主程序入口为 `src/main.cpp`，参数集中在 `config/config.yaml`。
-
-（图片）
-
-图1.1 算法数据流（取流 → 检测 → 解算 → 瞄准）
-
-### 1.1 检测（`Detect/`）
-
-推理后端由 `Detect/Yolo/choose_file` 按配置选择 **TensorRT**（`.engine`）或 **OpenVINO**，统一输出检测张量。`Detect/Detector` 做业务后处理：
-
-- 类别约定：`0=blue`，`1=red`，`2=white`；按 `hardware.our_side` 优先敌方主色，失败则 fallback 白靶。
-- 双模型时：配置 `white_model_path` 后，主色路与白靶路分离；锁定 white 后可只推白模型，丢检满 `det_lost` 帧再恢复串行。
-- OBB 角点指数平滑（`det_alpha`）、短时补帧，输出 `DetectResult`（框、置信度、类别、四角点）给解算。
-
-（图片）
-
-图1.2 主色 / white 双模型切换示意
-
-### 1.2 解算与瞄准（`Solver/`）
-
-`Solver::solve` 流水线：
-
-1. `solvePnP`：用靶标物理尺寸（`target.width/height`）与四角点求相机系位姿；
-2. 手眼：`R_body2gimbal` + `cam_to_gimbal` 变换到云台 / 世界系；
-3. **世界系 6 维匀速卡尔曼**（状态 \([x,y,z,v_x,v_y,v_z]\)，PnP 位置量测；实现挂在 `Tools/Kalman` 的 EKF 框架上，本链路为线性特例，并保留非线性 `f` / `h` 接口便于后续扩展）平滑后，按 `predict_horizon_s` 外推提前瞄准点；
-4. 激光 IK：几何初值附近网格粗搜 + 多轮细搜，最大化激光轴与目标方向点积，得到 yaw / pitch；
-5. 锁定判定：`lock_range` / `lock_beam_deg` 判断是否对准，经串口发给下位机。
-
-（图片）
-
-图1.3 PnP → 匀速卡尔曼提前量 → 激光 IK 解算流程
-
-### 1.3 标定与工具（`Tools/Calib` 等）
-
-| 模块 | 路径 | 作用 |
-|------|------|------|
-| 手眼标定 | `Tools/Calib/handeye/` | 独立可执行文件，标定 `cam_to_gimbal`、`rpy_body_to_gimbal` |
-| 激光口几何 | `Tools/Calib/ray_to_gimbal/` | 独立工具，多距离反推 / 写入 `ray_to_gimbal` |
-| 光轴残余 | `Tools/Calib/cam_to_ray/` | 链进主程序，标定 `rpy_cam_to_ray` |
-| 相机驱动 | `Tools/Hik/` | 海康 MVS 取流、曝光 / 增益 |
-| 录制 | `Tools/Record/` | 异步录 MP4，供训模 / 复盘 |
-| 回放 | `Test/` | `test` 模式喂视频或照片 |
-| 串口 | `Serial/` | 收云台 RPY，发瞄准角（CRC 协议） |
-
-推荐标定顺序：handeye → 写入 `offset.cam_to_gimbal` / `rpy_body_to_gimbal` → 确定 `ray_to_gimbal` → 再标 `rpy_cam_to_ray` 吃残余。
-
-（图片）
-
-图1.4 标定链路与 `offset` 配置关系
-
-### 1.4 仓库结构
+### 1 仓库结构
 
 ```
 ambition_radar/
@@ -105,29 +50,10 @@ ambition_radar/
 
 ```
 
-## 2 效果展示
 
-蓝方。敌方蓝色方约 **14–27 m** 内可稳定完成 **5 次** 反制。
+## 2 代码使用
 
-（图片）
-
-图2.1 蓝方检测与锁定效果
-
-红方。敌方红色方约 **14–18 m** 内可稳定五次；更远距离受红色数据集偏少影响，后续补数据重训即可改善。
-
-（图片）
-
-图2.2 红方近距检测效果
-
-调试界面。可显示检测框、瞄准点与锁定状态。
-
-（图片）
-
-图2.3 实机调试界面
-
-## 3 代码使用
-
-### 3.1 安装依赖
+### 2.1 安装依赖
 
 **系统**：建议 Ubuntu 22.04 + NVIDIA 显卡（TensorRT 推理）。
 
@@ -169,7 +95,7 @@ ambition_radar/
 
 > 运行时还需自备推理模型（`.engine` / OpenVINO 模型），路径写在 `config/config.yaml`。
 
-### 3.2 编译
+### 2.2 编译
 
 在仓库根目录：
 
@@ -201,7 +127,7 @@ make -C build/ -j$(nproc) handeye_capture handeye_calibrate ray_to_gimbal_calibr
 
 编译前请确认 `config/config.yaml` 中模型路径、串口、相机 SN 已按实机填写；`src/main.cpp` 内配置路径需改成本机绝对路径。
 
-### 3.3 标定
+### 2.3 标定
 
 #### 简单标定（约 4 s，赛后/震动恢复）
 
@@ -217,11 +143,11 @@ make -C build/ -j$(nproc) handeye_capture handeye_calibrate ray_to_gimbal_calibr
 
 按顺序做，前一步结果写入 `config/config.yaml` 的 `offset`：
 
-| 步骤 | 工具 | 产出 | 说明 |
-|------|------|------|------|
-| 1 手眼 | `handeye_capture` → `handeye_calibrate` | `cam_to_gimbal`、`rpy_body_to_gimbal` | 棋盘固定、云台多姿态；采集按 **s**，建议 ≥15 组 |
-| 2 激光口位置 | 图纸/卡尺 | `ray_to_gimbal` | 激光口相对云台旋转中心的平移（米） |
-| 3 光轴 | `app` 按 **W** | `rpy_cam_to_ray` | 各工作距离各标一组；激光十字与击打点重合时采点 |
+| 步骤  | 工具  | 产出 | 说明 |
+|------ |------ |------|------|
+| 1 手眼  | `handeye_capture` → `handeye_calibrate` | `cam_to_gimbal`、`rpy_body_to_gimbal` | 棋盘固定、云台多姿态；采集按 **s**，建议 ≥15 组 |
+| 2 激光口位置  | 图纸/卡尺 | `ray_to_gimbal` | 激光口相对云台旋转中心的平移（米） |
+| 3 光轴  | `app` 按 **W** | `rpy_cam_to_ray` | 各工作距离各标一组；激光十字与击打点重合时采点 |
 | 4 视差修正（可选） | `ray_to_gimbal_calibrate` | 改良 `ray_to_gimbal` + 距离无关 `rpy_cam_to_ray` | 多距离 rpy 随距离漂时，填 `config/ray_to_gimbal.yaml` 后运行 |
 
 手眼流程：
@@ -239,7 +165,7 @@ make -C build/ -j$(nproc) handeye_capture handeye_calibrate ray_to_gimbal_calibr
 # 将打印结果写入 config.yaml，再在中间距离按 W 微调
 ```
 
-### 3.4 运行
+### 2.4 运行
 
 **实机反制**（`run.mode: hik`）：
 
